@@ -17,23 +17,70 @@
             bool shotOnBoard = true;
 
             int[,] grid = new int[gridRows, gridCols];
-            for (int row = 0; row < 8; row++)
+            for (int row = 0; row < gridRows; row++)
             {
-                for (int col = 0; col < 8; col++)
+                for (int col = 0; col < gridCols; col++)
                 {
                     grid[row, col] = 0;
                 }
             }
 
             //Inital Board Draw
-            for (int row = 0; row < 8; row++)
+            //for (int row = 0; row < gridRows; row++)
+            //{
+            //    for (int col = 0; col < gridCols; col++)
+            //    {
+            //        Console.Write("~ ");
+            //    }
+            //    Console.WriteLine();
+            //}
+
+
+
+            //Draw the Board
+            //Board Lining
+            Console.WriteLine();
+            Console.Write("      | ");
+            for (int i = 0; i < gridCols - 1; i++)
             {
-                for (int col = 0; col < 8; col++)
+                Console.Write($"{i}  ");
+            }
+            Console.Write($"{gridCols - 1}");
+
+            Console.WriteLine();
+            Console.Write("    --|-");
+            for (int i = 0; i < gridCols - 1; i++)
+            {
+                Console.Write("---");
+            }
+            Console.Write("-");
+            Console.WriteLine();
+            //Board Grid
+            for (int row = 0; row < gridRows; row++)
+            {
+                Console.Write($"    {row} | ");
+                for (int col = 0; col < gridCols; col++)
                 {
-                    Console.Write("~ ");
+                    if (grid[row, col] == 0 || grid[row, col] == 1)
+                    {
+                        Console.Write("~  ");
+                    }
+                    else if (grid[row, col] == 2 || grid[row, col] == 4)
+                    {
+                        Console.Write("X ");
+                    }
+                    else if (grid[row, col] == 3)
+                    {
+                        Console.Write("O ");
+                    }
                 }
                 Console.WriteLine();
             }
+            Console.WriteLine();
+
+
+
+
 
             //Battle ship positions
             grid[0, 0] = 1;
@@ -44,13 +91,13 @@
             int deployedShips = 0;
             while (deployedShips < numberOfShips)
             {
-                int shipX = rando.Next(0, 8);
-                int shipY = rando.Next(0, 8);
-                if (grid[shipX, shipY] == 0)
+                int shipRow = rando.Next(0, gridRows);
+                int shipCol = rando.Next(0, gridCols);
+                if (grid[shipRow, shipCol] == 0)
                 {
-                    grid[shipX, shipY] = 1;
+                    grid[shipRow, shipCol] = 1;
                     deployedShips++;
-                    Console.WriteLine($" Ship coordinates are X{shipX} and Y{shipY}");
+                    Console.WriteLine($" Ship coordinates are X{shipRow} and Y{shipCol}");
                 }
             }
 
