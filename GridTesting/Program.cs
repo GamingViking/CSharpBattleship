@@ -5,17 +5,18 @@
         static void Main(string[] args)
         {
             Console.WriteLine("Welcome to BattleshipTM! Get ready to sink some ships!\n");
-            //0 = water, 1 = ship, 2 = hit, 3 = miss, 4 = previous hit
+            //0 = water, 1 = ship, 2 = hit, 3 = miss
             Console.WriteLine("How many ships will each side deploy in this battle?");
             int numberOfShips = Convert.ToInt32(Console.ReadLine());
             int yourShipsRemaining = numberOfShips;
             int enemyShipsRemaining = numberOfShips;
-            int gridRows = 8;
-            int gridCols = 8;
+            int gridRows = 18;
+            int gridCols = 18;
             int userRow = 0;
             int userCol = 0;
             bool shotOnBoard = true;
 
+            //Grid Generation
             int[,] grid = new int[gridRows, gridCols];
             for (int row = 0; row < gridRows; row++)
             {
@@ -24,63 +25,6 @@
                     grid[row, col] = 0;
                 }
             }
-
-            //Inital Board Draw
-            //for (int row = 0; row < gridRows; row++)
-            //{
-            //    for (int col = 0; col < gridCols; col++)
-            //    {
-            //        Console.Write("~ ");
-            //    }
-            //    Console.WriteLine();
-            //}
-
-
-
-            //Draw the Board
-            //Board Lining
-            Console.WriteLine();
-            Console.Write("      | ");
-            for (int i = 0; i < gridCols - 1; i++)
-            {
-                Console.Write($"{i}  ");
-            }
-            Console.Write($"{gridCols - 1}");
-
-            Console.WriteLine();
-            Console.Write("    --|-");
-            for (int i = 0; i < gridCols - 1; i++)
-            {
-                Console.Write("---");
-            }
-            Console.Write("-");
-            Console.WriteLine();
-            //Board Grid
-            for (int row = 0; row < gridRows; row++)
-            {
-                Console.Write($"    {row} | ");
-                for (int col = 0; col < gridCols; col++)
-                {
-                    if (grid[row, col] == 0 || grid[row, col] == 1)
-                    {
-                        Console.Write("~  ");
-                    }
-                    else if (grid[row, col] == 2 || grid[row, col] == 4)
-                    {
-                        Console.Write("X ");
-                    }
-                    else if (grid[row, col] == 3)
-                    {
-                        Console.Write("O ");
-                    }
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-
-
-
-
 
             //Battle ship positions
             grid[0, 0] = 1;
@@ -106,12 +50,70 @@
 
             while (loop)
             {
-
-
-
-
-                while (shotOnBoard == true)
+                while (shotOnBoard)
                 {
+                    //Draw the Board
+                    //Board Lining
+                    Console.WriteLine();
+                    Console.Write("      | ");
+                    for (int i = 0; i < gridCols - 1; i++)
+                    {
+                        if (i > 9)
+                        {
+                            Console.Write($"{i} ");
+                        }
+                        else
+                        {
+                            Console.Write($"{i}  ");
+                        }
+                    }
+                    Console.Write($"{gridCols - 1}");
+
+                    Console.WriteLine();
+                    Console.Write("    --|-");
+                    for (int i = 0; i < gridCols - 1; i++)
+                    {
+                        Console.Write("---");
+                    }
+                    if (gridCols > 9)
+                    {
+                        Console.Write("--");
+                    }
+                    else
+                    {
+                        Console.Write("-");
+                    }
+
+                    Console.WriteLine();
+                    //Board Grid
+                    for (int row = 0; row < gridRows; row++)
+                    {
+                        if (row > 9)
+                        {
+                            Console.Write($"    {row}| ");
+                        }
+                        else
+                        {
+                            Console.Write($"     {row}| ");
+                        }
+                        for (int col = 0; col < gridCols; col++)
+                        {
+                            if (grid[row, col] == 0 || grid[row, col] == 1)
+                            {
+                                Console.Write("~  ");
+                            }
+                            else if (grid[row, col] == 2 || grid[row, col] == 4)
+                            {
+                                Console.Write("X  ");
+                            }
+                            else if (grid[row, col] == 3)
+                            {
+                                Console.Write("O  ");
+                            }
+                        }
+                        Console.WriteLine();
+                    }
+                    Console.WriteLine();
 
 
                     Console.WriteLine("(0,0), (3,5), (0,4)");
@@ -138,13 +140,14 @@
 
                     if (userRow > 7 || userRow < 0 || userCol > 7 || userCol < 0)
                     {
-                        Console.WriteLine("You couldn't hit water if you fell out of a boat!\nKeep your shots on the board!");
+                        Console.WriteLine("That shot was off the board!\nTry again!");
                     }
                     else
                     {
                         shotOnBoard = false;
                     }
                 }
+                
                 shotOnBoard = true;
                 Console.WriteLine($"Last shot at: ({userRow}, {userCol})");
 
@@ -289,9 +292,9 @@
                
                 //Check to see if ships are alive
                 loop = false;
-                for (int row = 0; row < 8; row++)
+                for (int row = 0; row < gridRows; row++)
                 {
-                    for (int col = 0; col < 8; col++)
+                    for (int col = 0; col < gridCols; col++)
                     {
                         if (grid[row, col] == 1)
                         {
@@ -300,32 +303,9 @@
                     }
                 }
 
-                //Draw the Board
-                Console.WriteLine();
-                for (int row = 0; row < 8; row++)
-                {
-                    for (int col = 0; col < 8; col++)
-                    {
-                        if (grid[row, col] == 0 || grid[row, col] == 1)
-                        {
-                            Console.Write("~ ");
-                        }
-                        else if (grid[row, col] == 2 || grid[row, col] == 4)
-                        {
-                            Console.Write("X ");
-                        }
-                        else if (grid[row, col] == 3)
-                        {
-                            Console.Write("O ");
-                        }
-                    }
-                    Console.WriteLine();
-                }
-                Console.WriteLine();
-
-                //Win condition result
                 if (!loop)
                 {
+    //--------------------------Draw Victory Screen----------------------------------
                     Console.WriteLine("Congratulations! You sunk all of the ships!");
                 }
             }
