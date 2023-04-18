@@ -1,0 +1,15 @@
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\bin\Debug\net7.0\GridTesting.exe
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\bin\Debug\net7.0\GridTesting.deps.json
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\bin\Debug\net7.0\GridTesting.runtimeconfig.json
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\bin\Debug\net7.0\GridTesting.dll
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\bin\Debug\net7.0\GridTesting.pdb
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\obj\Debug\net7.0\GridTesting.csproj.AssemblyReference.cache
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\obj\Debug\net7.0\GridTesting.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\obj\Debug\net7.0\GridTesting.AssemblyInfoInputs.cache
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\obj\Debug\net7.0\GridTesting.AssemblyInfo.cs
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\obj\Debug\net7.0\GridTesting.csproj.CoreCompileInputs.cache
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\obj\Debug\net7.0\GridTesting.dll
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\obj\Debug\net7.0\refint\GridTesting.dll
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\obj\Debug\net7.0\GridTesting.pdb
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\obj\Debug\net7.0\GridTesting.genruntimeconfig.cache
+C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\obj\Debug\net7.0\ref\GridTesting.dll
