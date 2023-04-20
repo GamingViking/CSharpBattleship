@@ -17,6 +17,7 @@
             bool shotOnBoard = true;
             bool playingGame = true;
             int shipLimit = 20;
+            int shipIdentifier = 10;
 
             //Grid generation
             int[,] grid = new int[gridRows, gridCols];
@@ -29,9 +30,10 @@
             }
 
             //Battle ship positions
-            grid[0, 0] = 1;
-            grid[3, 5] = 1;
-            grid[0, 4] = 1;
+            //grid[0, 0] = 1;
+            //grid[3, 5] = 1;
+            //grid[0, 4] = 1;
+              grid[2, 5] = 1;
 
             Random rando = new Random();
             int deployedShips = 0;
@@ -47,6 +49,113 @@
                 }
             }
 
+            //Large ship generation
+            int largeShipCounter = 0;
+            while (largeShipCounter < 1)
+            {
+
+                int shipRow = rando.Next(0, gridRows);
+                int shipCol = rando.Next(0, gridCols);
+                string direction = "";
+
+                //If the space is empty
+                if (grid[shipRow, shipCol] == 0)
+                {
+                    //corner edge cases
+                    if (shipRow == 0 && shipCol == 0)
+                    {
+                        //check right or down
+                        CheckRight(direction, grid, shipRow, shipCol);
+                        CheckDown(direction, grid, shipRow, shipCol);
+                        
+                        ShipPlacement(int rando, int grid[,], int shipRow, int shipCol, int shipIdentifier)
+                        string[] directionOptions = direction.Split(" ");
+                        int randomDirection = rando.Next(0, directionOptions.Length + 1);
+                        if (directionOptions[randomDirection] == "left")
+                        {
+                            grid[shipRow, shipCol] = shipIdentifier;
+                            grid[shipRow, shipCol - 1] = shipIdentifier;
+                            grid[shipRow, shipCol - 2] = shipIdentifier;
+                            shipIdentifier++;
+                        }
+                        else if (directionOptions[randomDirection] == "right")
+                        {
+                            grid[shipRow, shipCol] = shipIdentifier;
+                            grid[shipRow, shipCol + 1] = shipIdentifier;
+                            grid[shipRow, shipCol + 2] = shipIdentifier;
+                            shipIdentifier++;
+                        }
+                        else if (directionOptions[randomDirection] == "up")
+                        {
+                            grid[shipRow, shipCol] = shipIdentifier;
+                            grid[shipRow + 1, shipCol] = shipIdentifier;
+                            grid[shipRow + 2, shipCol] = shipIdentifier;
+                            shipIdentifier++;
+                        }
+                        else if (directionOptions[randomDirection] == "down")
+                        {
+                            grid[shipRow, shipCol] = shipIdentifier;
+                            grid[shipRow - 1, shipCol] = shipIdentifier;
+                            grid[shipRow - 2, shipCol] = shipIdentifier;
+                            shipIdentifier++;
+                        }
+                        else if (directionOptions[randomDirection] == "leftright")
+                        {
+                            grid[shipRow, shipCol] = shipIdentifier;
+                            grid[shipRow, shipCol - 1] = shipIdentifier;
+                            grid[shipRow, shipCol + 1] = shipIdentifier;
+                            shipIdentifier++;
+                        }
+                        else if (directionOptions[randomDirection] == "updown")
+                        {
+                            grid[shipRow, shipCol] = shipIdentifier;
+                            grid[shipRow + 1, shipCol] = shipIdentifier;
+                            grid[shipRow - 1, shipCol] = shipIdentifier;
+                            shipIdentifier++;
+                        }
+
+
+
+
+                    }
+                    else if (shipRow == 0 && shipCol == gridCols)
+                    {
+                        //check left or down
+                    }
+                    else if (shipRow == gridRows && shipCol == 0)
+                    {
+                        //check up or right
+                    }
+                    else if (shipRow == gridRows && shipCol == gridCols)
+                    {
+                        //check up or left
+                    }
+                    //side edge cases
+                    else if (shipRow == 0 || shipRow == gridRows)
+                    {
+                        //only check horizontally
+                    }
+                    else if (shipCol == 0 || shipCol == gridCols)
+                    {
+                        //only check vertically
+                    }
+                    //one off of side edge cases
+                    else if (shipRow == 1 || shipRow == gridRows - 1)
+                    {
+                        //top and bottom 1, or down, or sideways
+                    }
+                    else if (shipCol == 1 || shipCol == gridCols - 1)
+                    {
+                        //left and right, or right, or up/down
+                    }
+                    //general case
+                    else
+                    {
+                        //check in a random direction
+                    }
+                }
+            }
+
             while (playingGame)
             {
                 while (shotOnBoard)
@@ -54,8 +163,8 @@
                     //Draw the Board
                     DrawTheBoard(gridRows, gridCols, grid);
 
-                    //Hard-coded ship positions
-                    Console.WriteLine("(1,1), (6,4), (5,1)");
+                    ////Hard-coded ship positions
+                    //Console.WriteLine("(1,1), (6,4), (5,1)");
 
                     //Draw ships remaining
                     DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining);
@@ -256,6 +365,49 @@
             }
         }
 
+        private static void CheckRight(string direction, int[,] grid, int shipRow, int shipCol)
+        {
+            if (grid[shipRow, shipCol + 1] == 0 && grid[shipRow, shipCol + 2] == 0)
+            {
+                direction += "right ";
+            }
+        }
+
+        private static void CheckLeft(string direction, int[,] grid, int shipRow, int shipCol)
+        {
+            if (grid[shipRow, shipCol - 1] == 0 && grid[shipRow, shipCol - 2] == 0)
+            {
+                direction += "left ";
+            }
+        }
+        private static void CheckUp(string direction, int[,] grid, int shipRow, int shipCol)
+        {
+            if (grid[shipRow + 1, shipCol] == 0 && grid[shipRow + 2, shipCol] == 0)
+            {
+                direction += "up ";
+            }
+        }
+        private static void CheckDown(string direction, int[,] grid, int shipRow, int shipCol)
+        {
+            if (grid[shipRow - 1, shipCol] == 0 && grid[shipRow - 2, shipCol] == 0)
+            {
+                direction += "down ";
+            }
+        }
+        private static void CheckUpDown(string direction, int[,] grid, int shipRow, int shipCol)
+        {
+            if (grid[shipRow - 1, shipCol] == 0 && grid[shipRow + 1, shipCol] == 0)
+            {
+                direction += "updown ";
+            }
+        }
+        private static void CheckLeftRight(string direction, int[,] grid, int shipRow, int shipCol)
+        {
+            if (grid[shipRow, shipCol - 1] == 0 && grid[shipRow, shipCol + 1] == 0)
+            {
+                direction += "leftright ";
+            }
+        }
         static void DrawTheBoard(int gridRows, int gridCols, int[,] grid)
         {
             //Boarder for the grid
@@ -334,5 +486,7 @@
                 Console.Write("() ");
             }
         }
+
+
     }
 }
