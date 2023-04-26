@@ -15,8 +15,8 @@ namespace GridTesting
 
             int yourShipsRemaining = numberOfShips;
             int enemyShipsRemaining = numberOfShips;
-            int gridRows = 08;
-            int gridCols = 08;
+            int gridRows = 8;
+            int gridCols = 8;
             int userRow = 0;
             int userCol = 0;
             bool shotOnBoard = true;
@@ -24,6 +24,8 @@ namespace GridTesting
             int shipLimit = 20;
             int shipIdentifier = 1;
             bool largeShipGenerator = true;
+            StringBuilder directionBuilder = new StringBuilder("");
+
 
             //Grid generation
             int[,] grid = new int[gridRows, gridCols];
@@ -61,10 +63,10 @@ namespace GridTesting
             {
                 int shipRow = rando.Next(0, gridRows);
                 int shipCol = rando.Next(0, gridCols);
-                string direction = "";
+                //string directionBuilder = "";
 
                 Console.WriteLine($"shipRow = {shipRow}, shipCol = {shipCol}");
-                LargeShipGeneration(direction, shipRow, shipCol, gridRows, gridCols, grid, largeShipGenerator, shipIdentifier);
+                LargeShipGeneration(shipRow, shipCol, gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
             }
 
             while (playingGame)
@@ -276,54 +278,78 @@ namespace GridTesting
             }
         }
 
-        private static void CheckRight(string direction, int[,] grid, int shipRow, int shipCol)
+        private static void CheckRight(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
         {
             if (grid[shipRow, shipCol + 1] == 0 && grid[shipRow, shipCol + 2] == 0)
             {
-                direction += "right ";
+                directionBuilder.Append("right ");
+                Console.WriteLine("RIGHT");
+                Console.WriteLine(directionBuilder);
             }
         }
 
-        private static void CheckLeft(string direction, int[,] grid, int shipRow, int shipCol)
+        private static void CheckLeft(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
         {
             if (grid[shipRow, shipCol - 1] == 0 && grid[shipRow, shipCol - 2] == 0)
             {
-                direction += "left ";
+                directionBuilder.Append("left ");
+                Console.WriteLine("LEFT");
+                Console.WriteLine(directionBuilder);
             }
         }
-        private static void CheckUp(string direction, int[,] grid, int shipRow, int shipCol)
-        {
-            if (grid[shipRow + 1, shipCol] == 0 && grid[shipRow + 2, shipCol] == 0)
-            {
-                direction += "up ";
-            }
-        }
-        private static void CheckDown(string direction, int[,] grid, int shipRow, int shipCol)
+        private static void CheckUp(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
         {
             if (grid[shipRow - 1, shipCol] == 0 && grid[shipRow - 2, shipCol] == 0)
             {
-                direction += "down ";
+                directionBuilder.Append("up ");
+                Console.WriteLine("UP");
+                Console.WriteLine(directionBuilder);
             }
         }
-        private static void CheckUpDown(string direction, int[,] grid, int shipRow, int shipCol)
+        private static void CheckDown(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
+        {
+            if (grid[shipRow + 1, shipCol] == 0 && grid[shipRow + 2, shipCol] == 0)
+            {
+                directionBuilder.Append("down ");
+                Console.WriteLine("DOWN");
+                Console.WriteLine(directionBuilder);
+            }
+        }
+        private static void CheckUpDown(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
         {
             if (grid[shipRow - 1, shipCol] == 0 && grid[shipRow + 1, shipCol] == 0)
             {
-                direction += "updown ";
+                directionBuilder.Append("updown ");
+                Console.WriteLine("UPDOWN");
+                Console.WriteLine(directionBuilder);
             }
         }
-        private static void CheckLeftRight(string direction, int[,] grid, int shipRow, int shipCol)
+        private static void CheckLeftRight(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
         {
             if (grid[shipRow, shipCol - 1] == 0 && grid[shipRow, shipCol + 1] == 0)
             {
-                direction += "leftright ";
+                directionBuilder.Append("leftright ");
+                Console.WriteLine("LEFTRIGHT");
+                Console.WriteLine(directionBuilder);
             }
         }
-        static void ShipPlacement(int[,] grid, int shipRow, int shipCol, int shipIdentifier, string direction, bool largeShipGenerator)
+        static void ShipPlacement(int[,] grid, int shipRow, int shipCol, int shipIdentifier, StringBuilder directionBuilder, bool largeShipGenerator)
         {
-            string[] directionOptions = direction.Split(" ");
+            string directionString = directionBuilder.ToString();
+            string[] directionOptions = directionString.Trim().Split(" ");
+
+            //TESTING STATION?????????????????????????????????????????
+            Console.WriteLine($"directionBuilder = {directionBuilder}");
+            Console.WriteLine("directionOption length = " + directionOptions.Length);
+            Console.WriteLine("directionOptions ->");
+            for (int i = 0; i < directionOptions.Length; i++)
+            {
+                Console.Write(directionOptions[i] + " ");
+            }
+
+
             Random rando = new Random();
-            int randomDirection = rando.Next(0, directionOptions.Length + 1);
+            int randomDirection = rando.Next(0, directionOptions.Length);
             if (directionOptions[randomDirection] == "left")
             {
                 grid[shipRow, shipCol] = shipIdentifier;
@@ -343,16 +369,16 @@ namespace GridTesting
             else if (directionOptions[randomDirection] == "up")
             {
                 grid[shipRow, shipCol] = shipIdentifier;
-                grid[shipRow + 1, shipCol] = shipIdentifier;
-                grid[shipRow + 2, shipCol] = shipIdentifier;
+                grid[shipRow - 1, shipCol] = shipIdentifier;
+                grid[shipRow - 2, shipCol] = shipIdentifier;
                 shipIdentifier++;
                 largeShipGenerator = false;
             }
             else if (directionOptions[randomDirection] == "down")
             {
                 grid[shipRow, shipCol] = shipIdentifier;
-                grid[shipRow - 1, shipCol] = shipIdentifier;
-                grid[shipRow - 2, shipCol] = shipIdentifier;
+                grid[shipRow + 1, shipCol] = shipIdentifier;
+                grid[shipRow + 2, shipCol] = shipIdentifier;
                 shipIdentifier++;
                 largeShipGenerator = false;
             }
@@ -367,202 +393,239 @@ namespace GridTesting
             else if (directionOptions[randomDirection] == "updown")
             {
                 grid[shipRow, shipCol] = shipIdentifier;
-                grid[shipRow + 1, shipCol] = shipIdentifier;
                 grid[shipRow - 1, shipCol] = shipIdentifier;
+                grid[shipRow + 1, shipCol] = shipIdentifier;
                 shipIdentifier++;
                 largeShipGenerator = false;
             }
         }
-        static void LargeShipGeneration(string direction, int shipRow, int shipCol, int gridRows, int gridCols, int[,] grid, bool largeShipGenerator, int shipIdentifier)
+        static void LargeShipGeneration(int shipRow, int shipCol, int gridRows, int gridCols, int[,] grid, bool largeShipGenerator, int shipIdentifier, StringBuilder directionBuilder)
         {
             //If the space is empty
             if (grid[shipRow, shipCol] == 0)
             {
+                directionBuilder.Clear();
                 //corner edge cases
                 if (shipRow == 0 && shipCol == 0)
                 {
                     //top left
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == 0 && shipCol == gridCols)
+                else if (shipRow == 0 && shipCol == gridCols - 1)
                 {
                     //top right
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == gridRows && shipCol == 0)
+                else if (shipRow == gridRows - 1 && shipCol == 0)
                 {
                     //bottom left
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == gridRows && shipCol == gridCols)
+                else if (shipRow == gridRows - 1 && shipCol == gridCols - 1)
                 {
                     //bottom right
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
                 //Top/bottom corner edge cases with one off
                 else if (shipRow == 0 && shipCol == 1)
                 {
                     //top left
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == 0 && shipCol == gridCols - 1)
+                else if (shipRow == 0 && shipCol == gridCols - 2)
                 {
                     //top right
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == gridRows && shipCol == 1)
+                else if (shipRow == gridRows - 1 && shipCol == 1)
                 {
                     //bottom left
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == gridRows && shipCol == gridCols - 1)
+                else if (shipRow == gridRows - 1 && shipCol == gridCols - 2)
                 {
                     //bottom right
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
                 //Left/right corner edge cases with one off
                 else if (shipRow == 1 && shipCol == 0)
                 {
                     //top left
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == gridRows - 1 && shipCol == 0)
+                else if (shipRow == gridRows - 2 && shipCol == 0)
                 {
                     //bottom left
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == 1 && shipCol == gridCols)
+                else if (shipRow == 1 && shipCol == gridCols - 1)
                 {
                     //top right
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == gridRows - 1 && shipCol == gridCols)
+                else if (shipRow == gridRows - 2 && shipCol == gridCols - 1)
                 {
                     //bottom right
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                //-------------- still need top/bottom side cases with one off
+                //corner edge cases off by one on each axis
+                else if (shipRow == 1 && shipCol == 1)
+                {
+                    //top left
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                }
+                else if (shipRow == 1 && shipCol == gridCols - 2)
+                {
+                    //top right
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                }
+                else if (shipRow == gridRows - 2 && shipCol == 1)
+                {
+                    //bottom left
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                }
+                else if (shipRow == gridRows - 2 && shipCol == gridCols - 2)
+                {
+                    //bottom right
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                }
                 //top, bottom and sides edge cases
                 else if (shipRow == 0)
                 {
                     //top
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == gridRows)
+                else if (shipRow == gridRows - 1)
                 {
                     //bottom
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
                 else if (shipCol == 0)
                 {
                     //left
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == gridRows)
+                else if (shipCol == gridCols - 1)
                 {
                     //right
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
                 //top, bottom and side edge cases with one off
                 else if (shipRow == 1)
                 {
                     //top
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipRow == gridRows - 1)
+                else if (shipRow == gridRows - 2)
                 {
                     //bottom
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
                 else if (shipCol == 1)
                 {
                     //left
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
-                else if (shipCol == gridCols - 1)
+                else if (shipCol == gridCols - 2)
                 {
                     //right
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
                 //general case
                 else
                 {
-                    //all directions
-                    CheckLeftRight(direction, grid, shipRow, shipCol);
-                    CheckLeft(direction, grid, shipRow, shipCol);
-                    CheckRight(direction, grid, shipRow, shipCol);
-                    CheckUp(direction, grid, shipRow, shipCol);
-                    CheckUpDown(direction, grid, shipRow, shipCol);
-                    CheckDown(direction, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, direction, largeShipGenerator);
+                    //all directionBuilders
+                    CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckLeft(directionBuilder, grid, shipRow, shipCol);
+                    CheckRight(directionBuilder, grid, shipRow, shipCol);
+                    CheckUp(directionBuilder, grid, shipRow, shipCol);
+                    CheckUpDown(directionBuilder, grid, shipRow, shipCol);
+                    CheckDown(directionBuilder, grid, shipRow, shipCol);
+                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
                 }
             }
         }
