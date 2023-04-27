@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Text;
 
 namespace GridTesting
@@ -42,9 +43,9 @@ namespace GridTesting
             //grid[0, 0] = 1;
             //grid[3, 5] = 1;
             //grid[0, 4] = 1;
-            grid[2, 5] = 1; //(6,3)
+            //grid[2, 5] = 1; //(6,3)
 
-            Random rando = new Random();
+            //Random rando = new Random();
             int deployedShips = 0;
             //while (deployedShips < numberOfShips)
             //{
@@ -59,14 +60,15 @@ namespace GridTesting
             //}
 
             //Large ship generation
-            while (largeShipGenerator)
+            while (deployedShips < numberOfShips)
             {
-                int shipRow = rando.Next(0, gridRows);
-                int shipCol = rando.Next(0, gridCols);
-                //string directionBuilder = "";
+                //int shipRow = rando.Next(0, gridRows);
+                //int shipCol = rando.Next(0, gridCols);
 
-                Console.WriteLine($"shipRow = {shipRow}, shipCol = {shipCol}");
-                LargeShipGeneration(shipRow, shipCol, gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                //Console.WriteLine($"shipRow = {shipRow}, shipCol = {shipCol}");
+                LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                deployedShips++;
+                //shipIdentifier++; (better than incrementing via function?)
             }
 
             while (playingGame)
@@ -283,8 +285,6 @@ namespace GridTesting
             if (grid[shipRow, shipCol + 1] == 0 && grid[shipRow, shipCol + 2] == 0)
             {
                 directionBuilder.Append("right ");
-                Console.WriteLine("RIGHT");
-                Console.WriteLine(directionBuilder);
             }
         }
 
@@ -293,8 +293,6 @@ namespace GridTesting
             if (grid[shipRow, shipCol - 1] == 0 && grid[shipRow, shipCol - 2] == 0)
             {
                 directionBuilder.Append("left ");
-                Console.WriteLine("LEFT");
-                Console.WriteLine(directionBuilder);
             }
         }
         private static void CheckUp(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
@@ -302,8 +300,6 @@ namespace GridTesting
             if (grid[shipRow - 1, shipCol] == 0 && grid[shipRow - 2, shipCol] == 0)
             {
                 directionBuilder.Append("up ");
-                Console.WriteLine("UP");
-                Console.WriteLine(directionBuilder);
             }
         }
         private static void CheckDown(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
@@ -311,8 +307,6 @@ namespace GridTesting
             if (grid[shipRow + 1, shipCol] == 0 && grid[shipRow + 2, shipCol] == 0)
             {
                 directionBuilder.Append("down ");
-                Console.WriteLine("DOWN");
-                Console.WriteLine(directionBuilder);
             }
         }
         private static void CheckUpDown(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
@@ -320,8 +314,6 @@ namespace GridTesting
             if (grid[shipRow - 1, shipCol] == 0 && grid[shipRow + 1, shipCol] == 0)
             {
                 directionBuilder.Append("updown ");
-                Console.WriteLine("UPDOWN");
-                Console.WriteLine(directionBuilder);
             }
         }
         private static void CheckLeftRight(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
@@ -329,8 +321,6 @@ namespace GridTesting
             if (grid[shipRow, shipCol - 1] == 0 && grid[shipRow, shipCol + 1] == 0)
             {
                 directionBuilder.Append("leftright ");
-                Console.WriteLine("LEFTRIGHT");
-                Console.WriteLine(directionBuilder);
             }
         }
         static void ShipPlacement(int[,] grid, int shipRow, int shipCol, int shipIdentifier, StringBuilder directionBuilder, bool largeShipGenerator)
@@ -339,13 +329,13 @@ namespace GridTesting
             string[] directionOptions = directionString.Trim().Split(" ");
 
             //TESTING STATION?????????????????????????????????????????
-            Console.WriteLine($"directionBuilder = {directionBuilder}");
-            Console.WriteLine("directionOption length = " + directionOptions.Length);
-            Console.WriteLine("directionOptions ->");
-            for (int i = 0; i < directionOptions.Length; i++)
-            {
-                Console.Write(directionOptions[i] + " ");
-            }
+            //Console.WriteLine($"directionBuilder = {directionBuilder}");
+            //Console.WriteLine("directionOption length = " + directionOptions.Length);
+            //Console.WriteLine("directionOptions ->");
+            //for (int i = 0; i < directionOptions.Length; i++)
+            //{
+            //    Console.Write(directionOptions[i] + " ");
+            //}
 
 
             Random rando = new Random();
@@ -399,8 +389,11 @@ namespace GridTesting
                 largeShipGenerator = false;
             }
         }
-        static void LargeShipGeneration(int shipRow, int shipCol, int gridRows, int gridCols, int[,] grid, bool largeShipGenerator, int shipIdentifier, StringBuilder directionBuilder)
+        static void LargeShipGeneration(int gridRows, int gridCols, int[,] grid, bool largeShipGenerator, int shipIdentifier, StringBuilder directionBuilder)
         {
+            Random rando = new Random();
+            int shipRow = rando.Next(0, gridRows);
+            int shipCol = rando.Next(0, gridCols);
             //If the space is empty
             if (grid[shipRow, shipCol] == 0)
             {
@@ -411,28 +404,57 @@ namespace GridTesting
                     //top left
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
+                    
                 }
                 else if (shipRow == 0 && shipCol == gridCols - 1)
                 {
                     //top right
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == gridRows - 1 && shipCol == 0)
                 {
                     //bottom left
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == gridRows - 1 && shipCol == gridCols - 1)
                 {
                     //bottom right
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 //Top/bottom corner edge cases with one off
                 else if (shipRow == 0 && shipCol == 1)
@@ -441,7 +463,14 @@ namespace GridTesting
                     CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == 0 && shipCol == gridCols - 2)
                 {
@@ -449,7 +478,14 @@ namespace GridTesting
                     CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == gridRows - 1 && shipCol == 1)
                 {
@@ -457,7 +493,14 @@ namespace GridTesting
                     CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == gridRows - 1 && shipCol == gridCols - 2)
                 {
@@ -465,7 +508,14 @@ namespace GridTesting
                     CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 //Left/right corner edge cases with one off
                 else if (shipRow == 1 && shipCol == 0)
@@ -474,7 +524,14 @@ namespace GridTesting
                     CheckUpDown(directionBuilder, grid, shipRow, shipCol);
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == gridRows - 2 && shipCol == 0)
                 {
@@ -482,7 +539,14 @@ namespace GridTesting
                     CheckUpDown(directionBuilder, grid, shipRow, shipCol);
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == 1 && shipCol == gridCols - 1)
                 {
@@ -490,7 +554,14 @@ namespace GridTesting
                     CheckUpDown(directionBuilder, grid, shipRow, shipCol);
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == gridRows - 2 && shipCol == gridCols - 1)
                 {
@@ -498,7 +569,14 @@ namespace GridTesting
                     CheckUpDown(directionBuilder, grid, shipRow, shipCol);
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 //corner edge cases off by one on each axis
                 else if (shipRow == 1 && shipCol == 1)
@@ -508,7 +586,14 @@ namespace GridTesting
                     CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == 1 && shipCol == gridCols - 2)
                 {
@@ -517,7 +602,14 @@ namespace GridTesting
                     CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == gridRows - 2 && shipCol == 1)
                 {
@@ -526,7 +618,14 @@ namespace GridTesting
                     CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == gridRows - 2 && shipCol == gridCols - 2)
                 {
@@ -535,7 +634,14 @@ namespace GridTesting
                     CheckLeftRight(directionBuilder, grid, shipRow, shipCol);
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 //top, bottom and sides edge cases
                 else if (shipRow == 0)
@@ -545,7 +651,14 @@ namespace GridTesting
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == gridRows - 1)
                 {
@@ -554,7 +667,14 @@ namespace GridTesting
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipCol == 0)
                 {
@@ -563,7 +683,14 @@ namespace GridTesting
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipCol == gridCols - 1)
                 {
@@ -572,7 +699,14 @@ namespace GridTesting
                     CheckLeft(directionBuilder, grid, shipRow, shipCol);
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 //top, bottom and side edge cases with one off
                 else if (shipRow == 1)
@@ -583,7 +717,14 @@ namespace GridTesting
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
                     CheckUpDown(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipRow == gridRows - 2)
                 {
@@ -593,7 +734,14 @@ namespace GridTesting
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
                     CheckUpDown(directionBuilder, grid, shipRow, shipCol);
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipCol == 1)
                 {
@@ -603,7 +751,14 @@ namespace GridTesting
                     CheckRight(directionBuilder, grid, shipRow, shipCol);
                     CheckUpDown(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 else if (shipCol == gridCols - 2)
                 {
@@ -613,7 +768,14 @@ namespace GridTesting
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckUpDown(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
                 //general case
                 else
@@ -625,8 +787,19 @@ namespace GridTesting
                     CheckUp(directionBuilder, grid, shipRow, shipCol);
                     CheckUpDown(directionBuilder, grid, shipRow, shipCol);
                     CheckDown(directionBuilder, grid, shipRow, shipCol);
-                    ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    if (directionBuilder.Length > 0)
+                    {
+                        ShipPlacement(grid, shipRow, shipCol, shipIdentifier, directionBuilder, largeShipGenerator);
+                    }
+                    else
+                    {
+                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                    }
                 }
+            }
+            else
+            {
+                LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
             }
         }
         static void DrawTheBoard(int gridRows, int gridCols, int[,] grid)
@@ -645,7 +818,7 @@ namespace GridTesting
                     Console.Write($"{i + 1}  ");
                 }
             }
-            Console.Write($"{gridCols - 1}");
+            Console.Write($"{gridCols}");
 
             Console.WriteLine();
             Console.Write("    --|-");
