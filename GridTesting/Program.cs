@@ -2,8 +2,6 @@
 using System.ComponentModel.Design;
 using System.Text;
 
-//CURRENT WORKING POSITION ON LINE: 275
-
 namespace GridTesting
 {
     internal class Program
@@ -36,6 +34,7 @@ namespace GridTesting
             int takeDamage = 0;
             int yourShipLife = 3 * yourShipsRemaining;
             int turnCounter = 0;
+            bool lastShotHit = false;
 
 
             //Grid generation
@@ -47,26 +46,6 @@ namespace GridTesting
                     grid[row, col] = 0;
                 }
             }
-
-
-            //Battle ship positions
-            //grid[0, 0] = 1;
-            //grid[3, 5] = 1;
-            //grid[0, 4] = 1;
-            //grid[2, 5] = 1; //(6,3)
-
-            //Random rando = new Random();
-            //while (deployedShips < numberOfShips)
-            //{
-            //    int shipRow = rando.Next(0, gridRows);
-            //    int shipCol = rando.Next(0, gridCols);
-            //    if (grid[shipRow, shipCol] == 0)
-            //    {
-            //        grid[shipRow, shipCol] = 1;
-            //        deployedShips++;
-            //        Console.WriteLine($" Ship coordinates are X{shipCol + 1} and Y{shipRow + 1}");
-            //    }
-            //}
 
             //Large ship generation
             while (deployedShips < numberOfShips)
@@ -89,15 +68,27 @@ namespace GridTesting
 
                     //Enemy attacks
                     Random rando = new Random();
-                    takeDamage = rando.Next(gridRows * gridCols);
+                    if (lastShotHit)
+                    {
+                        Console.WriteLine("The enemy is hunting down your ship!");
+                        takeDamage = rando.Next((gridRows * gridCols) / 2);
+                    }
+                    else
+                    {
+                        Console.WriteLine("The enemy is searching for your ships");
+                        takeDamage = rando.Next(gridRows * gridCols);
+                    }
+
                     if (takeDamage < chanceToBeHit)
                     {
                         Console.WriteLine("One of your ships has been hit by the enemy!");
+                        lastShotHit = true;
                         yourShipLife--;
                         if (yourShipLife % 3 == 0)
                         {
                             yourShipsRemaining--;
                             Console.WriteLine("One of your ships has been sunk by the enemy!");
+                            lastShotHit = false;
                             if (yourShipsRemaining == 0)
                             {
                                 gameOver = true;
@@ -106,7 +97,14 @@ namespace GridTesting
                     }
                     else
                     {
-                        Console.WriteLine("The enemy's shot missed our ships!");
+                        if (turnCounter == 0)
+                        {
+                            Console.WriteLine("The enemy is prepairing to fire at your ships!");
+                        }
+                        else
+                        {
+                            Console.WriteLine("The enemy's shot missed our ships!");
+                        }
                     }
                     if (turnCounter % Math.Floor((gridRows * gridCols) / 10.0) == 0)
                     chanceToBeHit++;
@@ -874,7 +872,7 @@ namespace GridTesting
                     }
                     else if (grid[row, col] > 9)
                     {
-                        Console.Write("S  ");
+                        Console.Write("~  ");
                     }
                     else if (grid[row, col] == 2 || grid[row, col] == 4)
                     {
