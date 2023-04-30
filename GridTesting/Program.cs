@@ -2,6 +2,8 @@
 using System.ComponentModel.Design;
 using System.Text;
 
+//CURRENT WORKING POSITION ON LINE: 275
+
 namespace GridTesting
 {
     internal class Program
@@ -22,10 +24,18 @@ namespace GridTesting
             int userCol = 0;
             bool shotOnBoard = true;
             bool playingGame = true;
-            int shipLimit = 20;
-            int shipIdentifier = 1;
+            bool gameOver = false;
+            int shipIdentifier = 10;
             bool largeShipGenerator = true;
             StringBuilder directionBuilder = new StringBuilder("");
+            int deployedShips = 0;
+            int[] shipLifeArray = new int[numberOfShips];
+            Array.Fill(shipLifeArray, 3);
+            int shipLifeIdentifier = 0;
+            int chanceToBeHit = 3 * numberOfShips;
+            int takeDamage = 0;
+            int yourShipLife = 3 * yourShipsRemaining;
+            int turnCounter = 0;
 
 
             //Grid generation
@@ -46,7 +56,6 @@ namespace GridTesting
             //grid[2, 5] = 1; //(6,3)
 
             //Random rando = new Random();
-            int deployedShips = 0;
             //while (deployedShips < numberOfShips)
             //{
             //    int shipRow = rando.Next(0, gridRows);
@@ -68,7 +77,7 @@ namespace GridTesting
                 //Console.WriteLine($"shipRow = {shipRow}, shipCol = {shipCol}");
                 LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
                 deployedShips++;
-                //shipIdentifier++; (better than incrementing via function?)
+                shipIdentifier++; 
             }
 
             while (playingGame)
@@ -76,42 +85,79 @@ namespace GridTesting
                 while (shotOnBoard)
                 {
                     //Draw the Board
-                    DrawTheBoard(gridRows, gridCols, grid);
+                    DrawTheBoard(gridRows, gridCols, grid, shipIdentifier);
 
-                    ////Hard-coded ship positions
-                    //Console.WriteLine("(1,1), (6,4), (5,1)");
+                    //Enemy attacks
+                    Random rando = new Random();
+                    takeDamage = rando.Next(gridRows * gridCols);
+                    if (takeDamage < chanceToBeHit)
+                    {
+                        Console.WriteLine("One of your ships has been hit by the enemy!");
+                        yourShipLife--;
+                        if (yourShipLife % 3 == 0)
+                        {
+                            yourShipsRemaining--;
+                            Console.WriteLine("One of your ships has been sunk by the enemy!");
+                            if (yourShipsRemaining == 0)
+                            {
+                                gameOver = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("The enemy's shot missed our ships!");
+                    }
+                    if (turnCounter % Math.Floor((gridRows * gridCols) / 10.0) == 0)
+                    chanceToBeHit++;
+                    Console.WriteLine($" turnCounter = {turnCounter}");
+                    Console.WriteLine($"ChanceToBeHit = {chanceToBeHit}");
 
                     //Draw ships remaining
                     DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining);
-                    
 
-                    Console.WriteLine();
-                    Console.WriteLine("   What square would you like to shoot at?");
-                    Console.WriteLine("Enter the X coordinate (column number)");
-                    userCol = Convert.ToInt32(Console.ReadLine()) - 1;
-                    Console.WriteLine("Enter the Y coordinate (row number)");
-                    userRow = Convert.ToInt32(Console.ReadLine()) - 1;
-                    Console.Clear();
-
-                    if (userRow > gridRows || userRow < 0 || userCol > gridCols || userCol < 0)
+                    if (!gameOver)
                     {
-                        Console.WriteLine("That shot was off the board!\nTry again!");
+                        Console.WriteLine();
+                        Console.WriteLine("   What square would you like to shoot at?");
+                        Console.WriteLine("Enter the X coordinate (column number)");
+                        userCol = Convert.ToInt32(Console.ReadLine()) - 1;
+                        Console.WriteLine("Enter the Y coordinate (row number)");
+                        userRow = Convert.ToInt32(Console.ReadLine()) - 1;
+                        Console.Clear();
+
+                        if (userRow > gridRows || userRow < 0 || userCol > gridCols || userCol < 0)
+                        {
+                            Console.WriteLine("That shot was off the board!\nTry again!");
+                        }
+                        else
+                        {
+                            shotOnBoard = false;
+                        }
                     }
                     else
                     {
                         shotOnBoard = false;
                     }
                 }
-                
+
                 shotOnBoard = true;
+                turnCounter++;
                 Console.WriteLine($"Last shot at: ({userCol + 1}, {userRow + 1})");
 
 
-                if (grid[userRow, userCol] == 1)
+                if (grid[userRow, userCol] > 9)
                 {
-                    Console.WriteLine("Shot landed - enemy ship down!");
+                    Console.WriteLine("Hit detected - we made contact with an enemy ship!");
+                    shipLifeIdentifier = grid[userRow, userCol];
+                    shipLifeArray[shipLifeIdentifier - 10] -= 1;
                     grid[userRow, userCol] = 2;
-                    enemyShipsRemaining--;
+                    if (shipLifeArray[shipLifeIdentifier - 10] == 0)
+                    {
+                        Console.WriteLine("You sunk a battleship!");
+                        enemyShipsRemaining--;
+                        shipLifeArray[shipLifeIdentifier - 10] = 1;
+                    }
                 }
                 else if (grid[userRow, userCol] == 2)
                 {
@@ -121,7 +167,7 @@ namespace GridTesting
                 //Top left corner
                 else if (userRow == 0 && userCol == 0)
                 {
-                    if (grid[userRow, userCol + 1] == 1 || grid[userRow + 1, userCol] == 1)
+                    if (grid[userRow, userCol + 1] > 9 || grid[userRow + 1, userCol] > 9)
                     {
                         Console.WriteLine("Close - an enemy ship must be nearby!");
                         grid[userRow, userCol] = 3;
@@ -135,7 +181,7 @@ namespace GridTesting
                 //Bottom left corner
                 else if (userRow == 7 && userCol == 0)
                 {
-                    if (grid[userRow, userCol + 1] == 1 || grid[userRow - 1, userCol] == 1)
+                    if (grid[userRow, userCol + 1] > 9 || grid[userRow - 1, userCol] > 9)
                     {
                         Console.WriteLine("Close - an enemy ship must be nearby!");
                         grid[userRow, userCol] = 3;
@@ -149,7 +195,7 @@ namespace GridTesting
                 //Bottom right corner
                 else if (userRow == 7 && userCol == 7)
                 {
-                    if (grid[userRow, userCol - 1] == 1 || grid[userRow - 1, userCol] == 1)
+                    if (grid[userRow, userCol - 1] > 9 || grid[userRow - 1, userCol] > 9)
                     {
                         Console.WriteLine("Close - an enemy ship must be nearby!");
                         grid[userRow, userCol] = 3;
@@ -163,7 +209,7 @@ namespace GridTesting
                 //Top right corner
                 else if (userRow == 0 && userCol == 7)
                 {
-                    if (grid[userRow, userCol - 1] == 1 || grid[userRow + 1, userCol] == 1)
+                    if (grid[userRow, userCol - 1] > 9 || grid[userRow + 1, userCol] > 9)
                     {
                         Console.WriteLine("Close - an enemy ship must be nearby!");
                         grid[userRow, userCol] = 3;
@@ -178,7 +224,7 @@ namespace GridTesting
                 //Top side
                 else if (userRow == 0)
                 {
-                    if (grid[userRow, userCol + 1] == 1 || grid[userRow, userCol - 1] == 1 || grid[userRow + 1, userCol] == 1)
+                    if (grid[userRow, userCol + 1] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow + 1, userCol] > 9)
                     {
                         Console.WriteLine("Close - an enemy ship must be nearby!");
                         grid[userRow, userCol] = 3;
@@ -192,7 +238,7 @@ namespace GridTesting
                 //Bottom side
                 else if (userRow == 7)
                 {
-                    if (grid[userRow, userCol + 1] == 1 || grid[userRow, userCol - 1] == 1 || grid[userRow - 1, userCol] == 1)
+                    if (grid[userRow, userCol + 1] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow - 1, userCol] > 9)
                     {
                         Console.WriteLine("Close - an enemy ship must be nearby!");
                         grid[userRow, userCol] = 3;
@@ -206,7 +252,7 @@ namespace GridTesting
                 //Left side
                 else if (userCol == 0)
                 {
-                    if (grid[userRow + 1, userCol] == 1 || grid[userRow - 1, userCol] == 1 || grid[userRow, userCol + 1] == 1)
+                    if (grid[userRow + 1, userCol] > 9 || grid[userRow - 1, userCol] > 9 || grid[userRow, userCol + 1] > 9)
                     {
                         Console.WriteLine("Close - an enemy ship must be nearby!");
                         grid[userRow, userCol] = 3;
@@ -220,7 +266,7 @@ namespace GridTesting
                 //Right side
                 else if (userCol == 7)
                 {
-                    if (grid[userRow + 1, userCol] == 1 || grid[userRow - 1, userCol] == 1 || grid[userRow, userCol - 1] == 1)
+                    if (grid[userRow + 1, userCol] > 9 || grid[userRow - 1, userCol] > 9 || grid[userRow, userCol - 1] > 9)
                     {
                         Console.WriteLine("Close - an enemy ship must be nearby!");
                         grid[userRow, userCol] = 3;
@@ -233,7 +279,7 @@ namespace GridTesting
                 }
 
                 //General close edge case
-                else if (grid[userRow - 1, userCol] == 1 || grid[userRow + 1, userCol] == 1 || grid[userRow, userCol - 1] == 1 || grid[userRow, userCol + 1] == 1)
+                else if (grid[userRow - 1, userCol] > 9 || grid[userRow + 1, userCol] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow, userCol + 1] > 9)
                 {
                     Console.WriteLine("Close - an enemy ship must be nearby!");
                     grid[userRow, userCol] = 3;
@@ -245,27 +291,13 @@ namespace GridTesting
                     grid[userRow, userCol] = 3;
                 }
 
-                ////Check to see if a specific ship is still alive
-                //ShipAliveCheck(int[,] grid, int gridRows, int gridCols, int shipLimit)
-                //for (int row = 0; row < gridRows; row++)
-                //{
-                //    for (int col = 0; col < gridCols; col++)
-                //    {
-                //        if (grid[row, col] <= shipLimit && grid[row, col] >= 10)
-                //        {
-                //            playingGame = true;
-                //        }
-                //    }
-                //}
-
-
                 //Check to see if ships are alive
                 playingGame = false;
                 for (int row = 0; row < gridRows; row++)
                 {
                     for (int col = 0; col < gridCols; col++)
                     {
-                        if (grid[row, col] < 2 && grid[row, col] > 0)
+                        if (grid[row, col] < shipIdentifier + 1 && grid[row, col] > 9)
                         {
                             playingGame = true;
                         }
@@ -274,8 +306,14 @@ namespace GridTesting
 
                 if (!playingGame)
                 {
-    //--------------------------Draw Victory Screen----------------------------------
+                    //--------------------------Draw Victory Screen----------------------------------
                     Console.WriteLine("Congratulations! You sunk all of the ships!");
+                }
+                if (gameOver)
+                {
+                    //---------------Draw separate lose screen? --------------------
+                    playingGame = false;
+                        Console.WriteLine("The enemy has bested you - all of your ships have sunk!");
                 }
             }
         }
@@ -328,16 +366,6 @@ namespace GridTesting
             string directionString = directionBuilder.ToString();
             string[] directionOptions = directionString.Trim().Split(" ");
 
-            //TESTING STATION?????????????????????????????????????????
-            //Console.WriteLine($"directionBuilder = {directionBuilder}");
-            //Console.WriteLine("directionOption length = " + directionOptions.Length);
-            //Console.WriteLine("directionOptions ->");
-            //for (int i = 0; i < directionOptions.Length; i++)
-            //{
-            //    Console.Write(directionOptions[i] + " ");
-            //}
-
-
             Random rando = new Random();
             int randomDirection = rando.Next(0, directionOptions.Length);
             if (directionOptions[randomDirection] == "left")
@@ -345,48 +373,36 @@ namespace GridTesting
                 grid[shipRow, shipCol] = shipIdentifier;
                 grid[shipRow, shipCol - 1] = shipIdentifier;
                 grid[shipRow, shipCol - 2] = shipIdentifier;
-                shipIdentifier++;
-                largeShipGenerator = false;
             }
             else if (directionOptions[randomDirection] == "right")
             {
                 grid[shipRow, shipCol] = shipIdentifier;
                 grid[shipRow, shipCol + 1] = shipIdentifier;
                 grid[shipRow, shipCol + 2] = shipIdentifier;
-                shipIdentifier++;
-                largeShipGenerator = false;
             }
             else if (directionOptions[randomDirection] == "up")
             {
                 grid[shipRow, shipCol] = shipIdentifier;
                 grid[shipRow - 1, shipCol] = shipIdentifier;
                 grid[shipRow - 2, shipCol] = shipIdentifier;
-                shipIdentifier++;
-                largeShipGenerator = false;
             }
             else if (directionOptions[randomDirection] == "down")
             {
                 grid[shipRow, shipCol] = shipIdentifier;
                 grid[shipRow + 1, shipCol] = shipIdentifier;
                 grid[shipRow + 2, shipCol] = shipIdentifier;
-                shipIdentifier++;
-                largeShipGenerator = false;
             }
             else if (directionOptions[randomDirection] == "leftright")
             {
                 grid[shipRow, shipCol] = shipIdentifier;
                 grid[shipRow, shipCol - 1] = shipIdentifier;
                 grid[shipRow, shipCol + 1] = shipIdentifier;
-                shipIdentifier++;
-                largeShipGenerator = false;
             }
             else if (directionOptions[randomDirection] == "updown")
             {
                 grid[shipRow, shipCol] = shipIdentifier;
                 grid[shipRow - 1, shipCol] = shipIdentifier;
                 grid[shipRow + 1, shipCol] = shipIdentifier;
-                shipIdentifier++;
-                largeShipGenerator = false;
             }
         }
         static void LargeShipGeneration(int gridRows, int gridCols, int[,] grid, bool largeShipGenerator, int shipIdentifier, StringBuilder directionBuilder)
@@ -394,6 +410,9 @@ namespace GridTesting
             Random rando = new Random();
             int shipRow = rando.Next(0, gridRows);
             int shipCol = rando.Next(0, gridCols);
+
+            Console.WriteLine($"ship X = {shipCol + 1}, ship Y = {shipRow + 1}");
+
             //If the space is empty
             if (grid[shipRow, shipCol] == 0)
             {
@@ -802,14 +821,14 @@ namespace GridTesting
                 LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
             }
         }
-        static void DrawTheBoard(int gridRows, int gridCols, int[,] grid)
+        static void DrawTheBoard(int gridRows, int gridCols, int[,] grid, int shipIdentifier)
         {
             //Boarder for the grid
             Console.WriteLine();
             Console.Write("      | ");
             for (int i = 0; i < gridCols - 1; i++)
             {
-                if (i > 9)
+                if (i > 8)
                 {
                     Console.Write($"{i + 1} ");
                 }
@@ -839,7 +858,7 @@ namespace GridTesting
             //The grid
             for (int row = 0; row < gridRows; row++)
             {
-                if (row > 9)
+                if (row > 8)
                 {
                     Console.Write($"    {row + 1}| ");
                 }
@@ -853,9 +872,9 @@ namespace GridTesting
                     {
                         Console.Write("~  ");
                     }
-                    else if (grid[row, col] == 1)
+                    else if (grid[row, col] > 9)
                     {
-                        Console.Write("M  ");
+                        Console.Write("S  ");
                     }
                     else if (grid[row, col] == 2 || grid[row, col] == 4)
                     {
