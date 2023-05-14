@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Text;
+using System.Data.SqlClient;
 
 namespace GridTesting
 {
@@ -10,7 +11,7 @@ namespace GridTesting
         {
             //VARIABLES - commented variables are declared elsewhere
             //KEY: 0 = water, 1 = ship, 2 = hit, 3 = miss
-            int mainMenuMax = 3;
+            int mainMenuMax = 4;
             int settingsMenuMax = 8;
             int numberOfShips = 8;
             //int yourShipsRemaining = numberOfShips;
@@ -34,8 +35,15 @@ namespace GridTesting
             //int yourShipLife = 3 * yourShipsRemaining;
             int turnCounter = 0;
             bool lastShotHit = false;
-            bool cheats = false;
+            bool cheats = true;
             bool settingsMenuing = true;
+            int difficultyMultiplier = 1;
+            string name = "";
+            int score = 0;
+
+            SqlConnection connection = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=""C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\Database1.mdf"";Integrated Security=True");
+            //connection.Open();
+
 
             //Generate Menu
             string[,] mainMenu = new string[mainMenuMax, 3];
@@ -54,6 +62,7 @@ namespace GridTesting
             mainMenu[0, 1] = "     START    ";
             mainMenu[1, 1] = "   GAME TYPE  ";
             mainMenu[2, 1] = "   SETTINGS   ";
+            mainMenu[3, 1] = "  HIGH SCORES ";
 
             Console.WriteLine("Standard Input Stream: {0}",
                              Console.In);
@@ -62,7 +71,7 @@ namespace GridTesting
             {
                 Console.Clear();
                 Console.WriteLine("       YOU ARE PLAYING BATTLESHIP       \n");
-                Console.WriteLine("               MAIN MENU                \n");
+                Console.WriteLine("                MAIN MENU               \n");
                 Console.WriteLine();
 
                 for (int row = 0; row < mainMenuMax; row++)
@@ -394,9 +403,43 @@ namespace GridTesting
                             //--------------------------Draw Victory Screen----------------------------------
                             Console.WriteLine("Congratulations! You sunk all of the ships!");
                             Console.WriteLine();
-                            Console.WriteLine($"Finshed in {turnCounter} turns. Final score: ");
+                            Console.WriteLine($"Finshed in {turnCounter} turns.");
                             DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining);
                             Console.WriteLine();
+                            Console.WriteLine("    [ CONTINUE ]    ");
+                            Console.ReadLine();
+                            score = (50 + (15 * numberOfShips * difficultyMultiplier)) - turnCounter;
+
+
+                            bool validName = false;
+                            while (!validName)
+                            {
+                                //Enter Score Screen
+                                Console.Clear();
+                                Console.WriteLine();
+                                Console.WriteLine("  YOU CLEARD THE GAME!   ");
+                                Console.WriteLine();
+                                
+                                Console.WriteLine($"YOUR SCORE: {score}");
+                                Console.WriteLine();
+                                Console.WriteLine("Enter your name: ");
+                                name = Console.ReadLine();
+                                if (name.Length > 9)
+                                {
+                                    Console.WriteLine("Name is too long. Please choose a name less than 10 characters");
+                                }
+                                else 
+                                    validName = true;
+                            }
+                            
+                            connection.Open();
+                            SqlCommand command = new SqlCommand($"INSERT INTO Scores (name, score) VALUES ('{name}', '{score}');", connection);
+                            command.ExecuteNonQuery();
+                            connection.Close();
+
+                            Console.WriteLine("\n          [ MAIN MENU]          ");
+                            mainMenuing = true;
+                            Console.ReadLine();
                         }
                         if (gameOver)
                         {
@@ -496,8 +539,55 @@ namespace GridTesting
                         }
                     }
                 }
-            }
+                //HIGH SCORES
+                else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == mainMenuMax - 1)
+                {
+                    Console.Clear();
+                    Console.WriteLine();
+                    Console.WriteLine("             HIGH SCORES          \n");
 
+                    //SqlConnection connection = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=""C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\Database1.mdf"";Integrated Security=True");
+
+                    SqlCommand command = new SqlCommand("SELECT top 10 * FROM Scores ORDER BY score DESC;", connection);
+                    connection.Open();
+
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    int[,] highScores = new int[10, 3];
+                    int rank = 1;
+
+                    Console.Write("     Rank       NAME        SCORE\n");
+
+                    while (reader.Read())
+                    {
+                        Console.Write($"      {rank.ToString().PadRight(9)}");
+                        Console.Write($"{reader["name"].ToString().PadRight(14)}");
+                        Console.WriteLine(reader["score"]);
+                        rank++;
+
+                        //for (int row = 0; row < 10; row++)
+                        //    {
+                        //        for (int col = 0; col < 3; col++)
+                        //        {
+                        //            if (col == 0)
+                        //                Console.Write(row + 1 + "    ");
+                        //            else if (col == 1)
+                        //                Console.Write($"{reader["name"]}    ");
+                        //            else if (col == 2)
+                        //                Console.Write(reader["score"]);
+                        //        }
+                        //    }
+
+
+                        // Console.WriteLine();
+                    }
+
+                    Console.WriteLine("\n            [ MAIN MENU ]       ");
+                    Console.ReadLine();
+                    connection.Close();
+                    //button to go back
+                }
+            }
 
 
 
