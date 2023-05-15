@@ -35,11 +35,17 @@ namespace GridTesting
             //int yourShipLife = 3 * yourShipsRemaining;
             int turnCounter = 0;
             bool lastShotHit = false;
-            bool cheats = true;
+            bool cheats = false;
             bool settingsMenuing = true;
             int difficultyMultiplier = 1;
             string name = "";
             int score = 0;
+
+            //Settings Menu Options
+            string cheatsDisplay = "     OFF    ";
+            string hpDisplay = "   VISUAL   ";
+            bool hpDisiplayNumber = false;
+            string difficultyDisplay = "   NORMAL   ";
 
             SqlConnection connection = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=""C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\Database1.mdf"";Integrated Security=True");
             //connection.Open();
@@ -109,8 +115,9 @@ namespace GridTesting
 
                     Console.Clear();
                     //Run the Game
-                    Console.WriteLine("How many ships will each side deploy in this battle?");
-                    numberOfShips = Convert.ToInt32(Console.ReadLine());
+                    //Console.WriteLine("How many ships will each side deploy in this battle?");
+                    //numberOfShips = Convert.ToInt32(Console.ReadLine());
+                    
                     int[] shipLifeArray = new int[numberOfShips];
                     Array.Fill(shipLifeArray, 3);
                     int chanceToBeHit = 3 * numberOfShips;
@@ -159,7 +166,7 @@ namespace GridTesting
                             if (lastShotHit)
                             {
                                 Console.WriteLine("The enemy is hunting down your ship!");
-                                takeDamage = rando.Next((gridRows * gridCols) / 2);
+                                takeDamage = rando.Next((gridRows * gridCols) / (2 * difficultyMultiplier));
                             }
                             else
                             {
@@ -193,7 +200,7 @@ namespace GridTesting
                                 {
                                     Console.WriteLine("The enemy's shot missed our ships!");
                                 }
-                                if (turnCounter % Math.Floor((gridRows * gridCols) / 10.0) == 0)
+                                if (turnCounter % Math.Floor((gridRows * gridCols) / (10.0 * difficultyMultiplier)) == 0)
                                 {
                                     chanceToBeHit++;
                                 }
@@ -203,7 +210,7 @@ namespace GridTesting
                             //Console.WriteLine($"ChanceToBeHit = {chanceToBeHit}");
 
                             //Draw ships remaining
-                            DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining);
+                            DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining, hpDisiplayNumber);
 
                             if (!gameOver)
                             {
@@ -404,7 +411,7 @@ namespace GridTesting
                             Console.WriteLine("Congratulations! You sunk all of the ships!");
                             Console.WriteLine();
                             Console.WriteLine($"Finshed in {turnCounter} turns.");
-                            DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining);
+                            DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining, hpDisiplayNumber);
                             Console.WriteLine();
                             Console.WriteLine("    [ CONTINUE ]    ");
                             Console.ReadLine();
@@ -477,26 +484,27 @@ namespace GridTesting
                         }
                     }
 
-                    settingsMenu[0, 0] = "   OPPONENT   ";
-                    settingsMenu[1, 0] = "  DIFFICULTY  ";
-                    settingsMenu[2, 0] = "  HP DISPLAY  ";
-                    settingsMenu[3, 0] = " # OF COLUMNS ";
-                    settingsMenu[4, 0] = "  # OF ROWS   ";
-                    settingsMenu[5, 0] = "  # OF SHIPS  ";
-                    settingsMenu[6, 0] = "    CHEATS    ";
-                    settingsMenu[7, 0] = "   MAIN MENU  ";
-
-                    settingsMenu[0, 2] = "  NARRATOR  ";
-                    settingsMenu[1, 2] = "   NORMAL   ";
-                    settingsMenu[2, 2] = "   VISUAL   ";
-                    settingsMenu[3, 2] = $"      {gridCols}     ";
-                    settingsMenu[4, 2] = $"      {gridRows}     ";
-                    settingsMenu[5, 2] = $"      {numberOfShips}     ";
-                    settingsMenu[6, 2] = "    OFF     ";
-                    settingsMenu[7, 2] = "     -      ";
-
                     while (settingsMenuing)
                     {
+                        settingsMenu[0, 0] = "   OPPONENT   ";
+                        settingsMenu[1, 0] = "  DIFFICULTY  ";
+                        settingsMenu[2, 0] = "  HP DISPLAY  ";
+                        settingsMenu[3, 0] = " # OF COLUMNS ";
+                        settingsMenu[4, 0] = "  # OF ROWS   ";
+                        settingsMenu[5, 0] = "  # OF SHIPS  ";
+                        settingsMenu[6, 0] = "    CHEATS    ";
+                        settingsMenu[7, 0] = "   MAIN MENU  ";
+
+                        settingsMenu[0, 2] = "  NARRATOR  ";
+                        settingsMenu[1, 2] = difficultyDisplay;
+                        settingsMenu[2, 2] = hpDisplay;
+                        settingsMenu[3, 2] = $"      {gridCols}     ";
+                        settingsMenu[4, 2] = $"      {gridRows}     ";
+                        settingsMenu[5, 2] = $"      {numberOfShips}     ";
+                        settingsMenu[6, 2] = cheatsDisplay;
+                        settingsMenu[7, 2] = "     -      ";
+
+
                         Console.Clear();
                         Console.WriteLine("      YOU ARE PLAYING BATTLESHIP      \n");
                         Console.WriteLine("            SETTINGS MENU             \n");
@@ -530,6 +538,87 @@ namespace GridTesting
                             else if (cursorRow == settingsMenuMax - 1)
                                 cursorRow = 0;
                         }
+
+
+                        ////SETTINGS BUTTONS
+                        ////Opponent display (stubbed)
+                        //else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 0)
+                        //{
+                        //    if (difficultyMultiplier == 1)
+                        //    {
+                        //        difficultyMultiplier = 2;
+                        //        difficultyDisplay = "    HARD    ";
+                        //    }
+                        //    else
+                        //    {
+                        //        difficultyMultiplier = 1;
+                        //        difficultyDisplay = "   NORMAL   ";
+                        //    }
+                        //}
+                        //Difficulty Display
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 1)
+                        {
+                            if (difficultyMultiplier == 1)
+                            {
+                                difficultyMultiplier = 2;
+                                difficultyDisplay = "    HARD    ";
+                            }
+                            else
+                            {
+                                difficultyMultiplier = 1;
+                                difficultyDisplay = "   NORMAL   ";
+                            }
+                        }
+                        //HP Display type
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 2)
+                        {
+                            if (hpDisiplayNumber)
+                            {
+                                hpDisiplayNumber = false;
+                                hpDisplay = "   VISUAL   ";
+                            }
+                            else
+                            {
+                                hpDisiplayNumber = true;
+                                hpDisplay = " NUMERICAL  ";
+                            }
+                        }
+                        //number of gird columns
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 3)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("\n\n        How columns will the field span?");
+                            gridCols = Convert.ToInt32(Console.ReadLine());
+                        }
+                        //number of gird rows
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 4)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("\n\n        How many rows will the field span?");
+                            gridRows = Convert.ToInt32(Console.ReadLine());
+                        }
+                        //number of ships deployed
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 5)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("\n\n        How many ships will each side deploy?");
+                            numberOfShips = Convert.ToInt32(Console.ReadLine());
+                        }
+                        //Cheats on/off
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 6)
+                        {
+                            if (cheats)
+                            {
+                                cheats = false;
+                                cheatsDisplay = "     OFF    ";
+                            }
+                            else
+                            {
+                                cheats = true;
+                                cheatsDisplay = "     ON     ";
+                            }
+                        }
+                        //Main Menu
                         else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == settingsMenuMax - 1)
                         {
                             mainMenuing = true;
@@ -1182,19 +1271,28 @@ namespace GridTesting
             Console.WriteLine();
         }
 
-        static void DrawShipsRemaining(int yourShipsRemaining, int enemyShipsRemaining)
-        {
+        static void DrawShipsRemaining(int yourShipsRemaining, int enemyShipsRemaining, bool hpDisplayNumber)
+        {            
             Console.Write(" Your ships remaining: ");
-            for (int i = 0; i < yourShipsRemaining; i++)
+            if (hpDisplayNumber)
+                Console.Write(yourShipsRemaining);
+            else
             {
-                Console.Write("() ");
+                for (int i = 0; i < yourShipsRemaining; i++)
+                {
+                    Console.Write("() ");
+                }
             }
-            Console.Write("\nEnemy ships remaining: ");
-            for (int i = 0; i < enemyShipsRemaining; i++)
+            Console.Write("\n Enemy ships remaining: ");
+            if (hpDisplayNumber)
+                Console.Write(enemyShipsRemaining);
+            else
             {
-                Console.Write("() ");
+                for (int i = 0; i < enemyShipsRemaining; i++)
+                {
+                    Console.Write("() ");
+                }
             }
         }
-
     }
 }
