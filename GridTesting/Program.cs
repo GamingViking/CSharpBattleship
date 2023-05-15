@@ -3,6 +3,9 @@ using System.ComponentModel.Design;
 using System.Text;
 using System.Data.SqlClient;
 
+//TODO
+//Center enemy name in settings menu
+//Out of bounds error on Line 297 (6 columns, 5 rows, 4 ships), only shot at (7,1)
 namespace GridTesting
 {
     internal class Program
@@ -40,6 +43,7 @@ namespace GridTesting
             int difficultyMultiplier = 1;
             string name = "";
             int score = 0;
+            string enemySelection = "NARRATOR";
 
             //Settings Menu Options
             string cheatsDisplay = "     OFF    ";
@@ -113,6 +117,50 @@ namespace GridTesting
                 {
                     mainMenuing = false;
 
+                    //Opponent generation/selection
+                    Enemy enemy = new Enemy();
+                    
+                    switch (enemySelection)
+                    {
+                        case "NARRATOR":
+                            enemy.enemyName = "  NARRATOR  ";
+                            enemy.enemyTurn0Action = "The enemy is prepairing to fire at your ships!";
+                            enemy.enemySearching = "The enemy is searching for your ships";
+                            enemy.enemyHunting = "The enemy is hunting down your ship!";
+                            enemy.shipHitByEnemy = "One of your ships has been hit by the enemy!";
+                            enemy.shipSunkByEnemy = "One of your ships has been sunk by the enemy!";
+                            enemy.enemyShotMissed = "The enemy's shot missed our ships!";
+                            enemy.shotOffBoard = "That shot was off the board!\nTry again!";
+                            enemy.hitEnemyShip = "Hit detected - we made contact with an enemy ship!";
+                            enemy.sunkEnemyShip = "You sunk a battleship!";
+                            enemy.spaceAlreadyHit = "That space has already been hit!";
+                            enemy.missedShot = "Missed - nothing but water!";
+                            enemy.closeShot = "Close - an enemy ship must be nearby!";
+                            enemy.enemyWins = "The enemy has bested you - all of your ships have sunk!";
+                            enemy.enemyLoses = "Congratulations! You sunk all of the ships!";
+                            break;
+                        case "PIRATE":
+                            enemy.enemyName = "   PIRATE   ";
+                            enemy.enemyTurn0Action = "Arrrrr, I'm comin' fer yer ships!";
+                            enemy.enemySearching = "Ye can run, but ye can't hide!";
+                            enemy.enemyHunting = "A scent o' blood in the water!";
+                            enemy.shipHitByEnemy = "Avast - take that, ye scallywag!";
+                            enemy.shipSunkByEnemy = "Down she goes to meet Davey Jones!";
+                            enemy.enemyShotMissed = "Alas, me shot be off the mark!";
+                            enemy.shotOffBoard = "Yer shootin' in wrong sea, matey!\nTry again!";
+                            enemy.hitEnemyShip = "I'm hit - water to the main deck!";
+                            enemy.sunkEnemyShip = "Grrrr, you sunk my beauty!";
+                            enemy.spaceAlreadyHit = "Ha, ya already shot there, ya landlubber!";
+                            enemy.missedShot = "Missed me - ha!";
+                            enemy.closeShot = "Arrr - that shot be too close fer comfort!";
+                            enemy.enemyWins = "Yer ships are fish food - time to walk the plank!";
+                            enemy.enemyLoses = "Ahhhh, ye got me - off I go to Davey Jones!";
+                            break;
+                        case "robot":
+                            break;
+                    }
+                    
+                    
                     Console.Clear();
                     //Run the Game
                     //Console.WriteLine("How many ships will each side deploy in this battle?");
@@ -165,30 +213,30 @@ namespace GridTesting
                             Random rando = new Random();
                             if (lastShotHit)
                             {
-                                Console.WriteLine("The enemy is hunting down your ship!");
+                                Console.WriteLine(enemy.enemyHunting);
                                 takeDamage = rando.Next((gridRows * gridCols) / (2 * difficultyMultiplier));
                             }
                             else
                             {
-                                Console.WriteLine("The enemy is searching for your ships");
+                                Console.WriteLine(enemy.enemySearching);
                                 takeDamage = rando.Next(gridRows * gridCols);
                             }
 
                             if (turnCounter == 0)
                             {
-                                Console.WriteLine("The enemy is prepairing to fire at your ships!");
+                                Console.WriteLine(enemy.enemyTurn0Action);
                             }
                             else
                             {
                                 if (takeDamage < chanceToBeHit)
                                 {
-                                    Console.WriteLine("One of your ships has been hit by the enemy!");
+                                    Console.WriteLine(enemy.shipHitByEnemy);
                                     lastShotHit = true;
                                     yourShipLife--;
                                     if (yourShipLife % 3 == 0)
                                     {
                                         yourShipsRemaining--;
-                                        Console.WriteLine("One of your ships has been sunk by the enemy!");
+                                        Console.WriteLine(enemy.shipSunkByEnemy);
                                         lastShotHit = false;
                                         if (yourShipsRemaining == 0)
                                         {
@@ -198,7 +246,7 @@ namespace GridTesting
                                 }
                                 else
                                 {
-                                    Console.WriteLine("The enemy's shot missed our ships!");
+                                    Console.WriteLine(enemy.enemyShotMissed);
                                 }
                                 if (turnCounter % Math.Floor((gridRows * gridCols) / (10.0 * difficultyMultiplier)) == 0)
                                 {
@@ -226,7 +274,7 @@ namespace GridTesting
 
                                 if (userRow > gridRows || userRow < 0 || userCol > gridCols || userCol < 0)
                                 {
-                                    Console.WriteLine("That shot was off the board!\nTry again!");
+                                    Console.WriteLine(enemy.shotOffBoard);
                                 }
                                 else
                                 {
@@ -248,20 +296,20 @@ namespace GridTesting
 
                             if (grid[userRow, userCol] > 9)
                             {
-                                Console.WriteLine("Hit detected - we made contact with an enemy ship!");
+                                Console.WriteLine(enemy.hitEnemyShip);
                                 shipLifeIdentifier = grid[userRow, userCol];
                                 shipLifeArray[shipLifeIdentifier - 10] -= 1;
                                 grid[userRow, userCol] = 2;
                                 if (shipLifeArray[shipLifeIdentifier - 10] == 0)
                                 {
-                                    Console.WriteLine("You sunk a battleship!");
+                                    Console.WriteLine(enemy.sunkEnemyShip);
                                     enemyShipsRemaining--;
                                     shipLifeArray[shipLifeIdentifier - 10] = 1;
                                 }
                             }
                             else if (grid[userRow, userCol] == 2)
                             {
-                                Console.WriteLine("That space has already been hit!");
+                                Console.WriteLine(enemy.spaceAlreadyHit);
                             }
                             //Edge-casing intensifies - corners
                             //Top left corner
@@ -269,12 +317,12 @@ namespace GridTesting
                             {
                                 if (grid[userRow, userCol + 1] > 9 || grid[userRow + 1, userCol] > 9)
                                 {
-                                    Console.WriteLine("Close - an enemy ship must be nearby!");
+                                    Console.WriteLine(enemy.closeShot);
                                     grid[userRow, userCol] = 3;
                                 }
                                 else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
                                 {
-                                    Console.WriteLine("Missed - nothing but water!");
+                                    Console.WriteLine(enemy.missedShot);
                                     grid[userRow, userCol] = 3;
                                 }
                             }
@@ -283,12 +331,12 @@ namespace GridTesting
                             {
                                 if (grid[userRow, userCol + 1] > 9 || grid[userRow - 1, userCol] > 9)
                                 {
-                                    Console.WriteLine("Close - an enemy ship must be nearby!");
+                                    Console.WriteLine(enemy.closeShot);
                                     grid[userRow, userCol] = 3;
                                 }
                                 else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
                                 {
-                                    Console.WriteLine("Missed - nothing but water!");
+                                    Console.WriteLine(enemy.missedShot);
                                     grid[userRow, userCol] = 3;
                                 }
                             }
@@ -297,12 +345,12 @@ namespace GridTesting
                             {
                                 if (grid[userRow, userCol - 1] > 9 || grid[userRow - 1, userCol] > 9)
                                 {
-                                    Console.WriteLine("Close - an enemy ship must be nearby!");
+                                    Console.WriteLine(enemy.closeShot);
                                     grid[userRow, userCol] = 3;
                                 }
                                 else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
                                 {
-                                    Console.WriteLine("Missed - nothing but water!");
+                                    Console.WriteLine(enemy.missedShot);
                                     grid[userRow, userCol] = 3;
                                 }
                             }
@@ -311,12 +359,12 @@ namespace GridTesting
                             {
                                 if (grid[userRow, userCol - 1] > 9 || grid[userRow + 1, userCol] > 9)
                                 {
-                                    Console.WriteLine("Close - an enemy ship must be nearby!");
+                                    Console.WriteLine(enemy.closeShot);
                                     grid[userRow, userCol] = 3;
                                 }
                                 else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
                                 {
-                                    Console.WriteLine("Missed - nothing but water!");
+                                    Console.WriteLine(enemy.missedShot);
                                     grid[userRow, userCol] = 3;
                                 }
                             }
@@ -326,12 +374,12 @@ namespace GridTesting
                             {
                                 if (grid[userRow, userCol + 1] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow + 1, userCol] > 9)
                                 {
-                                    Console.WriteLine("Close - an enemy ship must be nearby!");
+                                    Console.WriteLine(enemy.closeShot);
                                     grid[userRow, userCol] = 3;
                                 }
                                 else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
                                 {
-                                    Console.WriteLine("Missed - nothing but water!");
+                                    Console.WriteLine(enemy.missedShot);
                                     grid[userRow, userCol] = 3;
                                 }
                             }
@@ -340,12 +388,12 @@ namespace GridTesting
                             {
                                 if (grid[userRow, userCol + 1] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow - 1, userCol] > 9)
                                 {
-                                    Console.WriteLine("Close - an enemy ship must be nearby!");
+                                    Console.WriteLine(enemy.closeShot);
                                     grid[userRow, userCol] = 3;
                                 }
                                 else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
                                 {
-                                    Console.WriteLine("Missed - nothing but water!");
+                                    Console.WriteLine(enemy.missedShot);
                                     grid[userRow, userCol] = 3;
                                 }
                             }
@@ -354,12 +402,12 @@ namespace GridTesting
                             {
                                 if (grid[userRow + 1, userCol] > 9 || grid[userRow - 1, userCol] > 9 || grid[userRow, userCol + 1] > 9)
                                 {
-                                    Console.WriteLine("Close - an enemy ship must be nearby!");
+                                    Console.WriteLine(enemy.closeShot);
                                     grid[userRow, userCol] = 3;
                                 }
                                 else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
                                 {
-                                    Console.WriteLine("Missed - nothing but water!");
+                                    Console.WriteLine(enemy.missedShot);
                                     grid[userRow, userCol] = 3;
                                 }
                             }
@@ -368,12 +416,12 @@ namespace GridTesting
                             {
                                 if (grid[userRow + 1, userCol] > 9 || grid[userRow - 1, userCol] > 9 || grid[userRow, userCol - 1] > 9)
                                 {
-                                    Console.WriteLine("Close - an enemy ship must be nearby!");
+                                    Console.WriteLine(enemy.closeShot);
                                     grid[userRow, userCol] = 3;
                                 }
                                 else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
                                 {
-                                    Console.WriteLine("Missed - nothing but water!");
+                                    Console.WriteLine(enemy.missedShot);
                                     grid[userRow, userCol] = 3;
                                 }
                             }
@@ -381,13 +429,13 @@ namespace GridTesting
                             //General close edge case
                             else if (grid[userRow - 1, userCol] > 9 || grid[userRow + 1, userCol] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow, userCol + 1] > 9)
                             {
-                                Console.WriteLine("Close - an enemy ship must be nearby!");
+                                Console.WriteLine(enemy.closeShot);
                                 grid[userRow, userCol] = 3;
                             }
                             //General miss case
                             else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
                             {
-                                Console.WriteLine("Missed - nothing but water!");
+                                Console.WriteLine(enemy.missedShot);
                                 grid[userRow, userCol] = 3;
                             }
 
@@ -408,7 +456,7 @@ namespace GridTesting
                         if (!playingGame)
                         {
                             //--------------------------Draw Victory Screen----------------------------------
-                            Console.WriteLine("Congratulations! You sunk all of the ships!");
+                            Console.WriteLine(enemy.enemyLoses);
                             Console.WriteLine();
                             Console.WriteLine($"Finshed in {turnCounter} turns.");
                             DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining, hpDisiplayNumber);
@@ -452,7 +500,7 @@ namespace GridTesting
                         {
                             //---------------Draw separate lose screen? --------------------
                             playingGame = false;
-                            Console.WriteLine("\n    The enemy has bested you - all of your ships have sunk!");
+                            Console.WriteLine("\n    " + enemy.enemyWins);
                             Console.WriteLine($"That match lasted {turnCounter} turns.");
                             Console.WriteLine();
                         }
@@ -486,7 +534,7 @@ namespace GridTesting
 
                     while (settingsMenuing)
                     {
-                        settingsMenu[0, 0] = "   OPPONENT   ";
+                        settingsMenu[0, 0] = "     ENEMY    ";
                         settingsMenu[1, 0] = "  DIFFICULTY  ";
                         settingsMenu[2, 0] = "  HP DISPLAY  ";
                         settingsMenu[3, 0] = " # OF COLUMNS ";
@@ -495,7 +543,7 @@ namespace GridTesting
                         settingsMenu[6, 0] = "    CHEATS    ";
                         settingsMenu[7, 0] = "   MAIN MENU  ";
 
-                        settingsMenu[0, 2] = "  NARRATOR  ";
+                        settingsMenu[0, 2] = enemySelection.PadLeft(enemySelection.Length + 3);
                         settingsMenu[1, 2] = difficultyDisplay;
                         settingsMenu[2, 2] = hpDisplay;
                         settingsMenu[3, 2] = $"      {gridCols}     ";
@@ -540,21 +588,22 @@ namespace GridTesting
                         }
 
 
-                        ////SETTINGS BUTTONS
-                        ////Opponent display (stubbed)
-                        //else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 0)
-                        //{
-                        //    if (difficultyMultiplier == 1)
-                        //    {
-                        //        difficultyMultiplier = 2;
-                        //        difficultyDisplay = "    HARD    ";
-                        //    }
-                        //    else
-                        //    {
-                        //        difficultyMultiplier = 1;
-                        //        difficultyDisplay = "   NORMAL   ";
-                        //    }
-                        //}
+                        //SETTINGS BUTTONS
+                        //Enemy Display
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 0)
+                        {
+                            switch (enemySelection)
+                            {
+                                case "NARRATOR":
+                                    enemySelection = "PIRATE";
+                                    break;
+                                case "PIRATE":
+                                    enemySelection = "NARRATOR";
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                         //Difficulty Display
                         else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 1)
                         {
@@ -1292,6 +1341,42 @@ namespace GridTesting
                 {
                     Console.Write("() ");
                 }
+            }
+        }
+        class Enemy
+        {
+            public string enemyName;
+            public string enemyTurn0Action;
+            public string enemySearching;
+            public string enemyHunting;
+            public string shipHitByEnemy;
+            public string shipSunkByEnemy;
+            public string enemyShotMissed;
+            public string shotOffBoard;
+            public string hitEnemyShip;
+            public string sunkEnemyShip;
+            public string spaceAlreadyHit;
+            public string missedShot;
+            public string closeShot;
+            public string enemyWins;
+            public string enemyLoses;
+            public Enemy()
+            {
+                enemyName = "  NARRATOR  ";
+                enemyTurn0Action = "The enemy is prepairing to fire at your ships!";
+                enemySearching = "The enemy is searching for your ships";
+                enemyHunting = "The enemy is hunting down your ship!";
+                shipHitByEnemy = "One of your ships has been hit by the enemy!";
+                shipSunkByEnemy = "One of your ships has been sunk by the enemy!";
+                enemyShotMissed = "The enemy's shot missed our ships!";
+                shotOffBoard = "That shot was off the board!\nTry again!";
+                hitEnemyShip = "Hit detected - we made contact with an enemy ship!";
+                sunkEnemyShip = "You sunk a battleship!";
+                spaceAlreadyHit = "That space has already been hit!";
+                missedShot = "Missed - nothing but water!";
+                closeShot = "Close - an enemy ship must be nearby!";
+                enemyWins = "The enemy has bested you - all of your ships have sunk!";
+                enemyLoses = "Congratulations! You sunk all of the ships!";
             }
         }
     }
