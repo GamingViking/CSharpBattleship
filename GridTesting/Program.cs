@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 
 //TODO
+//Make multiple games in a row possible (One giant loop? Reset grid)
 //Center enemy name in settings menu
 //Add missles?
 //Varied ship length?
@@ -500,6 +501,7 @@ namespace GridTesting
 
                             Console.WriteLine("\n          [ MAIN MENU]          ");
                             mainMenuing = true;
+                            playingGame = true;
                             Console.ReadLine();
                         }
                         if (gameOver)
