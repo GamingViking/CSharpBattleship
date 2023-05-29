@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 
 //TODO
 //Make multiple games in a row possible (One giant loop? Reset grid)
+//More enemies
 //Center enemy name in settings menu
 //Add missles?
 //Varied ship length?
@@ -45,6 +46,10 @@ namespace GridTesting
             string name = "";
             int score = 0;
             string enemySelection = "NARRATOR";
+            string gameType = "BATTLE";
+            int gameTypeMenuMax = 7;
+            string gameTypeDescription = "";
+            bool gameTypeMenuing = true;
 
             //Settings Menu Options
             string cheatsDisplay = "     OFF    ";
@@ -98,6 +103,8 @@ namespace GridTesting
                     }
                     Console.WriteLine();
                 }
+
+                Console.WriteLine($"\n          GAME TYPE:  {gameType}");
 
                 ConsoleKeyInfo keyPressed = Console.ReadKey();
 
@@ -517,8 +524,155 @@ namespace GridTesting
                 //GAME TYPE
                 else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 1)
                 {
-                    Console.WriteLine("GAME TYPE MODE OPTIONS HERE");
                     mainMenuing = false;
+                    gameTypeMenuing = true;
+                    cursorCol = 1;
+                    cursorRow = 0;
+
+                    string[,] gameTypeMenu = new string[gameTypeMenuMax, 3];
+                    for (int row = 0; row < gameTypeMenuMax; row++)
+                    {
+                        for (int col = 0; col < 3; col++)
+                        {
+                            gameTypeMenu[row, col] = "       ";
+                        }
+                    }
+
+                    gameTypeMenu[0, 1] = " SPY HUNT  ";
+                    gameTypeMenu[1, 1] = " SKIRMISH  ";
+                    gameTypeMenu[2, 1] = "  BATTLE   ";
+                    gameTypeMenu[3, 1] = " INVASION  ";
+                    gameTypeMenu[4, 1] = "    WAR    ";
+                    gameTypeMenu[5, 1] = "  CUSTOM   ";
+                    gameTypeMenu[6, 1] = " MAIN MENU ";
+
+                    while (gameTypeMenuing)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("      YOU ARE PLAYING BATTLESHIP      \n");
+                        Console.WriteLine("          SELECT GAME TYPE             \n");
+                        Console.WriteLine();
+
+
+                        for (int row = 0; row < gameTypeMenuMax; row++)
+                        {
+                            for (int col = 0; col < 3; col++)
+                            {
+                                if (cursorRow == row && cursorCol == col)
+                                    Console.Write($"[ {gameTypeMenu[row, col]} ]");
+                                else
+                                    Console.Write($"  {gameTypeMenu[row, col]}  ");
+                            }
+                            Console.WriteLine();
+                        }
+
+                        switch (cursorRow)
+                        {
+                            case 0:
+                                gameTypeDescription = "       FIND THE SPY \n    A SINGLE SHIP IN A SMALL AREA";
+                                break;
+                            case 1:
+                                gameTypeDescription = "    A SMALL ENGAGEMENT\n     FEW SHIPS IN A SMALL AREA";
+                                break;
+                            case 2:
+                                gameTypeDescription = "    A STANDARD BATTLE\n   SHIPS IN A STANDARD-SIZE AREA";
+                                break;
+                            case 3:
+                                gameTypeDescription = "   A LARGE ENGAGEMENT\n    MANY SHIPS IN A LARGE AREA";
+                                break;
+                            case 4:
+                                gameTypeDescription = "   A MASSIVE ENGAGEMENT\n    LOTS OF SHIPS IN A HUGE AREA";
+                                break;
+                            case 5:
+                                gameTypeDescription = "   SET CUSTOM SETTINGS\n   GO TO 'SETTINGS' IN MAIN MENU";
+                                break;
+                            case 6:
+                                gameTypeDescription = "             -         ";
+                                break;
+                            default:
+                                break;
+                        }
+                        Console.WriteLine($"\n     {gameTypeDescription}");
+
+                        keyPressed = Console.ReadKey();
+
+                        if ((keyPressed.Key == ConsoleKey.W || keyPressed.Key == ConsoleKey.UpArrow))
+                        {
+                            if (cursorRow > 0)
+                                cursorRow -= 1;
+                            else if (cursorRow == 0)
+                                cursorRow = gameTypeMenuMax - 1;
+                        }
+                        else if ((keyPressed.Key == ConsoleKey.S || keyPressed.Key == ConsoleKey.DownArrow))
+                        {
+                            if (cursorRow < gameTypeMenuMax - 1)
+                                cursorRow += 1;
+                            else if (cursorRow == gameTypeMenuMax - 1)
+                                cursorRow = 0;
+                        }
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 0)
+                        {
+                            gameType = "SPY HUNT";
+                            gridRows = 5;
+                            gridCols = 5;
+                            numberOfShips = 1;
+                            mainMenuing = true;
+                            gameTypeMenuing = false;
+                            cursorRow = 0;
+                        }
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 1)
+                        {
+                            gameType = "SKIRMISH";
+                            gridRows = 6;
+                            gridCols = 6;
+                            numberOfShips = 4;
+                            mainMenuing = true;
+                            gameTypeMenuing = false;
+                            cursorRow = 0;
+                        }
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 2)
+                        {
+                            gameType = "BATTLE";
+                            gridRows = 8;
+                            gridCols = 8;
+                            numberOfShips = 8;
+                            mainMenuing = true;
+                            gameTypeMenuing = false;
+                            cursorRow = 0;
+                        }
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 3)
+                        {
+                            gameType = "INVASION";
+                            gridRows = 10;
+                            gridCols = 10;
+                            numberOfShips = 12;
+                            mainMenuing = true;
+                            gameTypeMenuing = false;
+                            cursorRow = 0;
+                        }
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 4)
+                        {
+                            gameType = "WAR";
+                            gridRows = 15;
+                            gridCols = 15;
+                            numberOfShips = 28;
+                            mainMenuing = true;
+                            gameTypeMenuing = false;
+                            cursorRow = 0;
+                        }
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 5)
+                        {
+                            mainMenuing = true;
+                            gameTypeMenuing = false;
+                            cursorRow = 2;
+                        }
+                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == gameTypeMenuMax - 1)
+                        {                           
+                            mainMenuing = true;
+                            gameTypeMenuing = false;
+                            cursorRow = 0;
+                        }
+                    }
                 }
                 //SETTINGS
                 else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 2)
@@ -713,6 +867,21 @@ namespace GridTesting
                             settingsMenuing = false;
                             cursorRow = 0;
                             cursorCol = 1;
+
+                            if (cheats)
+                                gameType = "CHEATER";
+                            else if (gridRows == 5 && gridCols == 5 && numberOfShips == 1)
+                                gameType = "SPY HUNT";
+                            else if (gridRows == 6 && gridCols == 6 && numberOfShips == 4)
+                                gameType = "SKIRMISH";
+                            else if (gridRows == 8 && gridCols == 8 && numberOfShips == 8)
+                                gameType = "BATTLE";
+                            else if (gridRows == 10 && gridCols == 10 && numberOfShips == 12)
+                                gameType = "INVASION";
+                            else if (gridRows == 15 && gridCols == 15 && numberOfShips == 28)
+                                gameType = "WAR";
+                            else
+                                gameType = "CUSTOM";
                         }
                     }
                 }
