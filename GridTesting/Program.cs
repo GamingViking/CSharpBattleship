@@ -2,9 +2,9 @@
 using System.Data.SqlClient;
 
 //TODO
-//Make multiple games in a row possible (One giant loop? Reset grid)
 //More enemies
 //Center enemy name in settings menu
+//Refactor Code for readability
 //Add missles?
 //Varied ship length?
 //targest you want to avoid?
@@ -16,7 +16,7 @@ namespace GridTesting
         {
             //VARIABLES - commented variables are declared elsewhere
             //KEY: 0 = water, 1 = ship, 2 = hit, 3 = miss
-            int mainMenuMax = 4;
+            int mainMenuMax = 5;
             int settingsMenuMax = 9;
             int numberOfShips = 8;
             //int yourShipsRemaining = numberOfShips;
@@ -26,6 +26,7 @@ namespace GridTesting
             int userRow = 0;
             int userCol = 0;
             bool shotOnBoard = true;
+            bool programRunning = true;
             bool playingGame = true;
             bool gameOver = false;
             int shipIdentifier = 10;
@@ -81,857 +82,832 @@ namespace GridTesting
             mainMenu[1, 1] = "   GAME TYPE  ";
             mainMenu[2, 1] = "   SETTINGS   ";
             mainMenu[3, 1] = "  HIGH SCORES ";
+            mainMenu[4, 1] = "     QUIT     ";
 
             Console.WriteLine("Standard Input Stream: {0}",
                              Console.In);
-
-            while (mainMenuing)
+            while (programRunning)
             {
-                Console.Clear();
-                Console.WriteLine("       YOU ARE PLAYING BATTLESHIP       \n");
-                Console.WriteLine("                MAIN MENU               \n");
-                Console.WriteLine();
+                playingGame = true;
+                mainMenuing = true;
+                shotOnBoard = true;
+                gameOver = false;
+                shipIdentifier = 10;
+                turnCounter = 0;
+                deployedShips = 0;
 
-                for (int row = 0; row < mainMenuMax; row++)
+                while (mainMenuing)
                 {
-                    for (int col = 0; col < 3; col++)
-                    {
-                        if (cursorRow == row && cursorCol == col)                       
-                            Console.Write($" [{mainMenu[row, col]}] ");                       
-                        else                        
-                            Console.Write($"  {mainMenu[row, col]}  ");                       
-                    }
+                    Console.Clear();
+                    Console.WriteLine("       YOU ARE PLAYING BATTLESHIP       \n");
+                    Console.WriteLine("                MAIN MENU               \n");
                     Console.WriteLine();
-                }
 
-                Console.WriteLine($"\n          GAME TYPE:  {gameType}");
-
-                ConsoleKeyInfo keyPressed = Console.ReadKey();
-
-                if ((keyPressed.Key == ConsoleKey.W || keyPressed.Key == ConsoleKey.UpArrow))
-                {
-                    if (cursorRow > 0)
-                        cursorRow -= 1;
-                    else if (cursorRow == 0)
-                        cursorRow = mainMenuMax - 1;
-                }
-                else if ((keyPressed.Key == ConsoleKey.S || keyPressed.Key == ConsoleKey.DownArrow))
-                {
-                    if (cursorRow < mainMenuMax - 1)
-                        cursorRow += 1;
-                    else if (cursorRow == mainMenuMax - 1)
-                        cursorRow = 0;
-                }
-                //START
-                else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 0)
-                {
-                    mainMenuing = false;
-
-                    //Opponent generation/selection
-                    Enemy enemy = new Enemy();
-                    
-                    switch (enemySelection)
+                    for (int row = 0; row < mainMenuMax; row++)
                     {
-                        case "NARRATOR":
-                            enemy.enemyName = "  NARRATOR  ";
-                            enemy.enemyTurn0Action = "The enemy is prepairing to fire at your ships!";
-                            enemy.enemySearching = "The enemy is searching for your ships";
-                            enemy.enemyHunting = "The enemy is hunting down your ship!";
-                            enemy.shipHitByEnemy = "One of your ships has been hit by the enemy!";
-                            enemy.shipSunkByEnemy = "One of your ships has been sunk by the enemy!";
-                            enemy.enemyShotMissed = "The enemy's shot missed our ships!";
-                            enemy.shotOffBoard = "That shot was off the board!\nTry again!";
-                            enemy.hitEnemyShip = "Hit detected - we made contact with an enemy ship!";
-                            enemy.sunkEnemyShip = "You sunk a battleship!";
-                            enemy.spaceAlreadyHit = "That space has already been hit!";
-                            enemy.missedShot = "Missed - nothing but water!";
-                            enemy.closeShot = "Close - an enemy ship must be nearby!";
-                            enemy.enemyWins = "The enemy has bested you - all of your ships have sunk!";
-                            enemy.enemyLoses = "Congratulations! You sunk all of the ships!";
-                            break;
-                        case "PIRATE":
-                            enemy.enemyName = "   PIRATE   ";
-                            enemy.enemyTurn0Action = "Arrrrr, I'm comin' fer yer ships!";
-                            enemy.enemySearching = "Ye can run, but ye can't hide!";
-                            enemy.enemyHunting = "A scent o' blood in the water!";
-                            enemy.shipHitByEnemy = "Avast - take that, ye scallywag!";
-                            enemy.shipSunkByEnemy = "Down she goes to meet Davey Jones!";
-                            enemy.enemyShotMissed = "Alas, me shot be off the mark!";
-                            enemy.shotOffBoard = "Yer shootin' in wrong sea, matey!\nTry again!";
-                            enemy.hitEnemyShip = "I'm hit - water to the main deck!";
-                            enemy.sunkEnemyShip = "Grrrr, you sunk my beauty!";
-                            enemy.spaceAlreadyHit = "Ha, ya already shot there, ya landlubber!";
-                            enemy.missedShot = "Missed me - ha!";
-                            enemy.closeShot = "Arrr - that shot be too close fer comfort!";
-                            enemy.enemyWins = "Yer ships are fish food - time to walk the plank!";
-                            enemy.enemyLoses = "Ahhhh, ye got me - off I go to Davey Jones!";
-                            break;
-                        case "robot":
-                            break;
-                    }
-                    
-                    
-                    Console.Clear();
-                    //Run the Game
-                    //Console.WriteLine("How many ships will each side deploy in this battle?");
-                    //numberOfShips = Convert.ToInt32(Console.ReadLine());
-                    
-                    int[] shipLifeArray = new int[numberOfShips];
-                    Array.Fill(shipLifeArray, 3);
-                    int chanceToBeHit = 3 * numberOfShips;
-                    int yourShipsRemaining = numberOfShips;
-                    int enemyShipsRemaining = numberOfShips;
-                    int yourShipLife = 3 * yourShipsRemaining;
-
-                    Console.Clear();
-                    //Grid generation
-                    int[,] grid = new int[gridRows, gridCols];
-                    for (int row = 0; row < gridRows; row++)
-                    {
-                        for (int col = 0; col < gridCols; col++)
+                        for (int col = 0; col < 3; col++)
                         {
-                            grid[row, col] = 0;
+                            if (cursorRow == row && cursorCol == col)
+                                Console.Write($" [{mainMenu[row, col]}] ");
+                            else
+                                Console.Write($"  {mainMenu[row, col]}  ");
                         }
+                        Console.WriteLine();
                     }
 
-                    //Large ship generation
-                    while (deployedShips < numberOfShips)
-                    {
-                        //int shipRow = rando.Next(0, gridRows);
-                        //int shipCol = rando.Next(0, gridCols);
+                    Console.WriteLine($"\n          GAME TYPE:  {gameType}");
 
-                        //Console.WriteLine($"shipRow = {shipRow}, shipCol = {shipCol}");
-                        LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
-                        deployedShips++;
-                        shipIdentifier++;
+                    ConsoleKeyInfo keyPressed = Console.ReadKey();
+
+                    if ((keyPressed.Key == ConsoleKey.W || keyPressed.Key == ConsoleKey.UpArrow))
+                    {
+                        if (cursorRow > 0)
+                            cursorRow -= 1;
+                        else if (cursorRow == 0)
+                            cursorRow = mainMenuMax - 1;
                     }
-
-                    while (playingGame)
+                    else if ((keyPressed.Key == ConsoleKey.S || keyPressed.Key == ConsoleKey.DownArrow))
                     {
-                        while (shotOnBoard)
+                        if (cursorRow < mainMenuMax - 1)
+                            cursorRow += 1;
+                        else if (cursorRow == mainMenuMax - 1)
+                            cursorRow = 0;
+                    }
+                    //START
+                    else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 0)
+                    {
+                        mainMenuing = false;
+
+                        //Opponent generation/selection
+                        Enemy enemy = new Enemy();
+
+                        switch (enemySelection)
                         {
-                            if (turnCounter == 0)
+                            case "NARRATOR":
+                                enemy.enemyName = "  NARRATOR  ";
+                                enemy.enemyTurn0Action = "The enemy is prepairing to fire at your ships!";
+                                enemy.enemySearching = "The enemy is searching for your ships";
+                                enemy.enemyHunting = "The enemy is hunting down your ship!";
+                                enemy.shipHitByEnemy = "One of your ships has been hit by the enemy!";
+                                enemy.shipSunkByEnemy = "One of your ships has been sunk by the enemy!";
+                                enemy.enemyShotMissed = "The enemy's shot missed our ships!";
+                                enemy.shotOffBoard = "That shot was off the board!\nTry again!";
+                                enemy.hitEnemyShip = "Hit detected - we made contact with an enemy ship!";
+                                enemy.sunkEnemyShip = "You sunk a battleship!";
+                                enemy.spaceAlreadyHit = "That space has already been hit!";
+                                enemy.missedShot = "Missed - nothing but water!";
+                                enemy.closeShot = "Close - an enemy ship must be nearby!";
+                                enemy.enemyWins = "The enemy has bested you - all of your ships have sunk!";
+                                enemy.enemyLoses = "Congratulations! You sunk all of the ships!";
+                                break;
+                            case "PIRATE":
+                                enemy.enemyName = "   PIRATE   ";
+                                enemy.enemyTurn0Action = "Arrrrr, I'm comin' fer yer ships!";
+                                enemy.enemySearching = "Ye can run, but ye can't hide!";
+                                enemy.enemyHunting = "A scent o' blood in the water!";
+                                enemy.shipHitByEnemy = "Avast - take that, ye scallywag!";
+                                enemy.shipSunkByEnemy = "Down she goes to meet Davey Jones!";
+                                enemy.enemyShotMissed = "Alas, me shot be off the mark!";
+                                enemy.shotOffBoard = "Yer shootin' in wrong sea, matey!\nTry again!";
+                                enemy.hitEnemyShip = "I'm hit - water to the main deck!";
+                                enemy.sunkEnemyShip = "Grrrr, you sunk my beauty!";
+                                enemy.spaceAlreadyHit = "Ha, ya already shot there, ya landlubber!";
+                                enemy.missedShot = "Missed me - ha!";
+                                enemy.closeShot = "Arrr - that shot be too close fer comfort!";
+                                enemy.enemyWins = "Yer ships are fish food - time to walk the plank!";
+                                enemy.enemyLoses = "Ahhhh, ye got me - off I go to Davey Jones!";
+                                break;
+                            case "robot":
+                                break;
+                        }
+
+
+                        Console.Clear();
+                        //Run the Game
+                        //Console.WriteLine("How many ships will each side deploy in this battle?");
+                        //numberOfShips = Convert.ToInt32(Console.ReadLine());
+
+                        int[] shipLifeArray = new int[numberOfShips];
+                        Array.Fill(shipLifeArray, 3);
+                        int chanceToBeHit = 3 * numberOfShips;
+                        int yourShipsRemaining = numberOfShips;
+                        int enemyShipsRemaining = numberOfShips;
+                        int yourShipLife = 3 * yourShipsRemaining;
+
+                        Console.Clear();
+                        //Grid generation
+                        int[,] grid = new int[gridRows, gridCols];
+                        for (int row = 0; row < gridRows; row++)
+                        {
+                            for (int col = 0; col < gridCols; col++)
                             {
-                                Console.WriteLine("No shots made yet");
-                                Console.WriteLine("Preparing to fire");
+                                grid[row, col] = 0;
                             }
+                        }
 
-                            //Draw the Board
-                            DrawTheBoard(gridRows, gridCols, grid, shipIdentifier, cheats);
+                        //Large ship generation
+                        while (deployedShips < numberOfShips)
+                        {
+                            //int shipRow = rando.Next(0, gridRows);
+                            //int shipCol = rando.Next(0, gridCols);
 
-                            //Enemy attacks
-                            Random rando = new Random();
-                            if (lastShotHit)
+                            //Console.WriteLine($"shipRow = {shipRow}, shipCol = {shipCol}");
+                            LargeShipGeneration(gridRows, gridCols, grid, largeShipGenerator, shipIdentifier, directionBuilder);
+                            deployedShips++;
+                            shipIdentifier++;
+                        }
+
+                        while (playingGame)
+                        {
+                            while (shotOnBoard)
                             {
-                                if (!lessUI)
-                                Console.WriteLine(enemy.enemyHunting);
-
-                                takeDamage = rando.Next((gridRows * gridCols) / (2 * difficultyMultiplier));
-                            }
-                            else
-                            {
-                                if (!lessUI)
-                                Console.WriteLine(enemy.enemySearching);
-
-                                takeDamage = rando.Next(gridRows * gridCols);
-                            }
-
-                            if (turnCounter == 0)
-                            {
-                                Console.WriteLine(enemy.enemyTurn0Action);
-                            }
-                            else
-                            {
-                                if (takeDamage < chanceToBeHit)
+                                if (turnCounter == 0)
                                 {
-                                    Console.WriteLine(enemy.shipHitByEnemy);
-                                    lastShotHit = true;
-                                    yourShipLife--;
-                                    if (yourShipLife % 3 == 0)
+                                    Console.WriteLine("No shots made yet");
+                                    Console.WriteLine("Preparing to fire");
+                                }
+
+                                //Draw the Board
+                                DrawTheBoard(gridRows, gridCols, grid, shipIdentifier, cheats);
+
+                                //Enemy attacks
+                                EnemyAttacks(gridRows, gridCols, ref gameOver, turnCounter, ref lastShotHit, difficultyMultiplier, lessUI, enemy, ref chanceToBeHit, ref yourShipsRemaining, ref yourShipLife);
+
+                                //Draw ships remaining
+                                DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining, hpDisiplayNumber, lessUI);
+
+                                if (!gameOver)
+                                {
+                                    Console.WriteLine();
+                                    Console.WriteLine("   What square would you like to shoot at?");
+                                    Console.WriteLine("Enter the X coordinate (column number)");
+
+                                    userCol = Convert.ToInt32(Console.ReadLine()) - 1;
+                                    Console.WriteLine("Enter the Y coordinate (row number)");
+
+                                    userRow = Convert.ToInt32(Console.ReadLine()) - 1;
+                                    Console.Clear();
+
+                                    if (userRow >= gridRows || userRow < 0 || userCol >= gridCols || userCol < 0)
                                     {
-                                        yourShipsRemaining--;
-                                        Console.WriteLine(enemy.shipSunkByEnemy);
-                                        lastShotHit = false;
-                                        if (yourShipsRemaining == 0)
-                                        {
-                                            gameOver = true;
-                                        }
+                                        Console.WriteLine(enemy.shotOffBoard);
                                     }
-                                }
-                                else
-                                {
-                                    Console.WriteLine(enemy.enemyShotMissed);
-                                }
-                                if (turnCounter % Math.Floor((gridRows * gridCols) / (10.0 * difficultyMultiplier)) == 0)
-                                {
-                                    chanceToBeHit++;
-                                }
-                            }
-
-                            //Console.WriteLine($" turnCounter = {turnCounter}");
-                            //Console.WriteLine($"ChanceToBeHit = {chanceToBeHit}");
-
-                            //Draw ships remaining
-                            DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining, hpDisiplayNumber, lessUI);
-
-                            if (!gameOver)
-                            {
-                                Console.WriteLine();
-                                Console.WriteLine("   What square would you like to shoot at?");
-                                Console.WriteLine("Enter the X coordinate (column number)");
-
-                                userCol = Convert.ToInt32(Console.ReadLine()) - 1;
-                                Console.WriteLine("Enter the Y coordinate (row number)");
-
-                                userRow = Convert.ToInt32(Console.ReadLine()) - 1;
-                                Console.Clear();
-
-                                if (userRow >= gridRows || userRow < 0 || userCol >= gridCols || userCol < 0)
-                                {
-                                    Console.WriteLine(enemy.shotOffBoard);
+                                    else
+                                    {
+                                        shotOnBoard = false;
+                                    }
                                 }
                                 else
                                 {
                                     shotOnBoard = false;
                                 }
                             }
-                            else
-                            {
-                                shotOnBoard = false;
-                            }
-                        }
 
-                        if (!gameOver)
-                        {
-                            shotOnBoard = true;
-                            turnCounter++;
-                            Console.WriteLine($"Last shot at: ({userCol + 1}, {userRow + 1})");
+                            if (!gameOver)
+                            {
+                                shotOnBoard = true;
+                                turnCounter++;
+                                Console.WriteLine($"Last shot at: ({userCol + 1}, {userRow + 1})");
 
 
-                            if (grid[userRow, userCol] > 9)
-                            {
-                                Console.WriteLine(enemy.hitEnemyShip);
-                                shipLifeIdentifier = grid[userRow, userCol];
-                                shipLifeArray[shipLifeIdentifier - 10] -= 1;
-                                grid[userRow, userCol] = 2;
-                                if (shipLifeArray[shipLifeIdentifier - 10] == 0)
+                                if (grid[userRow, userCol] > 9)
                                 {
-                                    Console.WriteLine(enemy.sunkEnemyShip);
-                                    enemyShipsRemaining--;
-                                    shipLifeArray[shipLifeIdentifier - 10] = 1;
-                                }
-                            }
-                            else if (grid[userRow, userCol] == 2)
-                            {
-                                Console.WriteLine(enemy.spaceAlreadyHit);
-                            }
-                            //Edge-casing intensifies - corners
-                            //Top left corner
-                            else if (userRow == 0 && userCol == 0)
-                            {
-                                if (grid[userRow, userCol + 1] > 9 || grid[userRow + 1, userCol] > 9)
-                                {
-                                    Console.WriteLine(enemy.closeShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                                else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
-                                {
-                                    Console.WriteLine(enemy.missedShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                            }
-                            //Bottom left corner
-                            else if (userRow == 7 && userCol == 0)
-                            {
-                                if (grid[userRow, userCol + 1] > 9 || grid[userRow - 1, userCol] > 9)
-                                {
-                                    Console.WriteLine(enemy.closeShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                                else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
-                                {
-                                    Console.WriteLine(enemy.missedShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                            }
-                            //Bottom right corner
-                            else if (userRow == 7 && userCol == 7)
-                            {
-                                if (grid[userRow, userCol - 1] > 9 || grid[userRow - 1, userCol] > 9)
-                                {
-                                    Console.WriteLine(enemy.closeShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                                else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
-                                {
-                                    Console.WriteLine(enemy.missedShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                            }
-                            //Top right corner
-                            else if (userRow == 0 && userCol == 7)
-                            {
-                                if (grid[userRow, userCol - 1] > 9 || grid[userRow + 1, userCol] > 9)
-                                {
-                                    Console.WriteLine(enemy.closeShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                                else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
-                                {
-                                    Console.WriteLine(enemy.missedShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                            }
-                            //Edge-casing sides
-                            //Top side
-                            else if (userRow == 0)
-                            {
-                                if (grid[userRow, userCol + 1] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow + 1, userCol] > 9)
-                                {
-                                    Console.WriteLine(enemy.closeShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                                else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
-                                {
-                                    Console.WriteLine(enemy.missedShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                            }
-                            //Bottom side
-                            else if (userRow == 7)
-                            {
-                                if (grid[userRow, userCol + 1] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow - 1, userCol] > 9)
-                                {
-                                    Console.WriteLine(enemy.closeShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                                else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
-                                {
-                                    Console.WriteLine(enemy.missedShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                            }
-                            //Left side
-                            else if (userCol == 0)
-                            {
-                                if (grid[userRow + 1, userCol] > 9 || grid[userRow - 1, userCol] > 9 || grid[userRow, userCol + 1] > 9)
-                                {
-                                    Console.WriteLine(enemy.closeShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                                else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
-                                {
-                                    Console.WriteLine(enemy.missedShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                            }
-                            //Right side
-                            else if (userCol == 7)
-                            {
-                                if (grid[userRow + 1, userCol] > 9 || grid[userRow - 1, userCol] > 9 || grid[userRow, userCol - 1] > 9)
-                                {
-                                    Console.WriteLine(enemy.closeShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                                else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
-                                {
-                                    Console.WriteLine(enemy.missedShot);
-                                    grid[userRow, userCol] = 3;
-                                }
-                            }
-
-                            //General close edge case
-                            else if (grid[userRow - 1, userCol] > 9 || grid[userRow + 1, userCol] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow, userCol + 1] > 9)
-                            {
-                                Console.WriteLine(enemy.closeShot);
-                                grid[userRow, userCol] = 3;
-                            }
-                            //General miss case
-                            else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
-                            {
-                                Console.WriteLine(enemy.missedShot);
-                                grid[userRow, userCol] = 3;
-                            }
-
-                            //Check to see if ships are alive
-                            playingGame = false;
-                            for (int row = 0; row < gridRows; row++)
-                            {
-                                for (int col = 0; col < gridCols; col++)
-                                {
-                                    if (grid[row, col] < shipIdentifier + 1 && grid[row, col] > 9)
+                                    Console.WriteLine(enemy.hitEnemyShip);
+                                    shipLifeIdentifier = grid[userRow, userCol];
+                                    shipLifeArray[shipLifeIdentifier - 10] -= 1;
+                                    grid[userRow, userCol] = 2;
+                                    if (shipLifeArray[shipLifeIdentifier - 10] == 0)
                                     {
-                                        playingGame = true;
+                                        Console.WriteLine(enemy.sunkEnemyShip);
+                                        enemyShipsRemaining--;
+                                        shipLifeArray[shipLifeIdentifier - 10] = 1;
+                                    }
+                                }
+                                else if (grid[userRow, userCol] == 2)
+                                {
+                                    Console.WriteLine(enemy.spaceAlreadyHit);
+                                }
+                                //Edge-casing intensifies - corners
+                                //Top left corner
+                                else if (userRow == 0 && userCol == 0)
+                                {
+                                    if (grid[userRow, userCol + 1] > 9 || grid[userRow + 1, userCol] > 9)
+                                    {
+                                        Console.WriteLine(enemy.closeShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                    else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
+                                    {
+                                        Console.WriteLine(enemy.missedShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                }
+                                //Bottom left corner
+                                else if (userRow == gridRows - 1 && userCol == 0)
+                                {
+                                    if (grid[userRow, userCol + 1] > 9 || grid[userRow - 1, userCol] > 9)
+                                    {
+                                        Console.WriteLine(enemy.closeShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                    else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
+                                    {
+                                        Console.WriteLine(enemy.missedShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                }
+                                //Bottom right corner
+                                else if (userRow == gridRows - 1 && userCol == gridCols - 1)
+                                {
+                                    if (grid[userRow, userCol - 1] > 9 || grid[userRow - 1, userCol] > 9)
+                                    {
+                                        Console.WriteLine(enemy.closeShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                    else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
+                                    {
+                                        Console.WriteLine(enemy.missedShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                }
+                                //Top right corner
+                                else if (userRow == 0 && userCol == gridCols - 1)
+                                {
+                                    if (grid[userRow, userCol - 1] > 9 || grid[userRow + 1, userCol] > 9)
+                                    {
+                                        Console.WriteLine(enemy.closeShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                    else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
+                                    {
+                                        Console.WriteLine(enemy.missedShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                }
+                                //Edge-casing sides
+                                //Top side
+                                else if (userRow == 0)
+                                {
+                                    if (grid[userRow, userCol + 1] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow + 1, userCol] > 9)
+                                    {
+                                        Console.WriteLine(enemy.closeShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                    else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
+                                    {
+                                        Console.WriteLine(enemy.missedShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                }
+                                //Bottom side
+                                else if (userRow == gridRows - 1)
+                                {
+                                    if (grid[userRow, userCol + 1] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow - 1, userCol] > 9)
+                                    {
+                                        Console.WriteLine(enemy.closeShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                    else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
+                                    {
+                                        Console.WriteLine(enemy.missedShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                }
+                                //Left side
+                                else if (userCol == 0)
+                                {
+                                    if (grid[userRow + 1, userCol] > 9 || grid[userRow - 1, userCol] > 9 || grid[userRow, userCol + 1] > 9)
+                                    {
+                                        Console.WriteLine(enemy.closeShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                    else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
+                                    {
+                                        Console.WriteLine(enemy.missedShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                }
+                                //Right side
+                                else if (userCol == gridCols - 1)
+                                {
+                                    if (grid[userRow + 1, userCol] > 9 || grid[userRow - 1, userCol] > 9 || grid[userRow, userCol - 1] > 9)
+                                    {
+                                        Console.WriteLine(enemy.closeShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                    else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
+                                    {
+                                        Console.WriteLine(enemy.missedShot);
+                                        grid[userRow, userCol] = 3;
+                                    }
+                                }
+
+                                //General close edge case
+                                else if (grid[userRow - 1, userCol] > 9 || grid[userRow + 1, userCol] > 9 || grid[userRow, userCol - 1] > 9 || grid[userRow, userCol + 1] > 9)
+                                {
+                                    Console.WriteLine(enemy.closeShot);
+                                    grid[userRow, userCol] = 3;
+                                }
+                                //General miss case
+                                else if (grid[userRow, userCol] == 0 || grid[userRow, userCol] == 3)
+                                {
+                                    Console.WriteLine(enemy.missedShot);
+                                    grid[userRow, userCol] = 3;
+                                }
+
+                                //Check to see if ships are alive
+                                playingGame = false;
+                                for (int row = 0; row < gridRows; row++)
+                                {
+                                    for (int col = 0; col < gridCols; col++)
+                                    {
+                                        if (grid[row, col] < shipIdentifier + 1 && grid[row, col] > 9)
+                                        {
+                                            playingGame = true;
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (!playingGame)
-                        {
-                            //--------------------------Draw Victory Screen----------------------------------
-                            Console.WriteLine(enemy.enemyLoses);
-                            Console.WriteLine();
-                            Console.WriteLine($"Finshed in {turnCounter} turns.");
-                            DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining, hpDisiplayNumber, lessUI);
-                            Console.WriteLine();
-                            Console.WriteLine("    [ CONTINUE ]    ");
-                            Console.ReadLine();
-                            score = (50 + (15 * numberOfShips * difficultyMultiplier)) - turnCounter;
-
-
-                            bool validName = false;
-                            while (!validName)
+                            if (!playingGame)
                             {
-                                //Enter Score Screen
-                                Console.Clear();
+                                //--------------------------Draw Victory Screen----------------------------------
+                                Console.WriteLine(enemy.enemyLoses);
                                 Console.WriteLine();
-                                Console.WriteLine("  YOU CLEARD THE GAME!   ");
+                                Console.WriteLine($"Finshed in {turnCounter} turns.");
+                                DrawShipsRemaining(yourShipsRemaining, enemyShipsRemaining, hpDisiplayNumber, lessUI);
                                 Console.WriteLine();
-                                
-                                Console.WriteLine($"YOUR SCORE: {score}");
-                                Console.WriteLine();
-                                Console.WriteLine("Enter your name: ");
-                                name = Console.ReadLine();
-                                if (name.Length > 9)
+                                Console.WriteLine("    [ CONTINUE ]    ");
+                                Console.ReadLine();
+                                score = (50 + (15 * numberOfShips * difficultyMultiplier)) - turnCounter;
+
+
+                                bool validName = false;
+                                while (!validName)
                                 {
-                                    Console.WriteLine("Name is too long. Please choose a name less than 10 characters");
+                                    //Enter Score Screen
+                                    Console.Clear();
+                                    Console.WriteLine();
+                                    Console.WriteLine("  YOU CLEARD THE GAME!   ");
+                                    Console.WriteLine();
+
+                                    Console.WriteLine($"YOUR SCORE: {score}");
+                                    Console.WriteLine();
+                                    Console.WriteLine("Enter your name: ");
+                                    name = Console.ReadLine();
+                                    if (name.Length > 9)
+                                    {
+                                        Console.WriteLine("Name is too long. Please choose a name less than 10 characters");
+                                    }
+                                    else
+                                        validName = true;
                                 }
-                                else 
-                                    validName = true;
+
+                                connection.Open();
+                                SqlCommand command = new SqlCommand($"INSERT INTO Scores (name, score) VALUES ('{name}', '{score}');", connection);
+                                command.ExecuteNonQuery();
+                                connection.Close();
+
+                                Console.WriteLine("\n          [ MAIN MENU ]          ");
+                                Console.ReadLine();
                             }
-                            
-                            connection.Open();
-                            SqlCommand command = new SqlCommand($"INSERT INTO Scores (name, score) VALUES ('{name}', '{score}');", connection);
-                            command.ExecuteNonQuery();
-                            connection.Close();
+                            if (gameOver)
+                            {
+                                //---------------Draw separate lose screen? --------------------
+                                playingGame = false;
+                                mainMenuing = false;
+                                Console.WriteLine("\n    " + enemy.enemyWins);
+                                Console.WriteLine($"That match lasted {turnCounter} turns.");
+                                Console.WriteLine();
 
-                            Console.WriteLine("\n          [ MAIN MENU]          ");
-                            mainMenuing = true;
-                            playingGame = true;
-                            Console.ReadLine();
-                        }
-                        if (gameOver)
-                        {
-                            //---------------Draw separate lose screen? --------------------
-                            playingGame = false;
-                            Console.WriteLine("\n    " + enemy.enemyWins);
-                            Console.WriteLine($"That match lasted {turnCounter} turns.");
-                            Console.WriteLine();
+                                Console.WriteLine("\n          [ MAIN MENU ]          ");
+                                Console.ReadLine();
+                            }
                         }
                     }
-                }
-                //GAME TYPE
-                else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 1)
-                {
-                    mainMenuing = false;
-                    gameTypeMenuing = true;
-                    cursorCol = 1;
-                    cursorRow = 0;
-
-                    string[,] gameTypeMenu = new string[gameTypeMenuMax, 3];
-                    for (int row = 0; row < gameTypeMenuMax; row++)
+                    //GAME TYPE
+                    else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 1)
                     {
-                        for (int col = 0; col < 3; col++)
-                        {
-                            gameTypeMenu[row, col] = "       ";
-                        }
-                    }
+                        mainMenuing = false;
+                        gameTypeMenuing = true;
+                        cursorCol = 1;
+                        cursorRow = 0;
 
-                    gameTypeMenu[0, 1] = " SPY HUNT  ";
-                    gameTypeMenu[1, 1] = " SKIRMISH  ";
-                    gameTypeMenu[2, 1] = "  BATTLE   ";
-                    gameTypeMenu[3, 1] = " INVASION  ";
-                    gameTypeMenu[4, 1] = "    WAR    ";
-                    gameTypeMenu[5, 1] = "  CUSTOM   ";
-                    gameTypeMenu[6, 1] = " MAIN MENU ";
-
-                    while (gameTypeMenuing)
-                    {
-                        Console.Clear();
-                        Console.WriteLine("      YOU ARE PLAYING BATTLESHIP      \n");
-                        Console.WriteLine("          SELECT GAME TYPE             \n");
-                        Console.WriteLine();
-
-
+                        string[,] gameTypeMenu = new string[gameTypeMenuMax, 3];
                         for (int row = 0; row < gameTypeMenuMax; row++)
                         {
                             for (int col = 0; col < 3; col++)
                             {
-                                if (cursorRow == row && cursorCol == col)
-                                    Console.Write($"[ {gameTypeMenu[row, col]} ]");
-                                else
-                                    Console.Write($"  {gameTypeMenu[row, col]}  ");
+                                gameTypeMenu[row, col] = "       ";
                             }
+                        }
+
+                        gameTypeMenu[0, 1] = " SPY HUNT  ";
+                        gameTypeMenu[1, 1] = " SKIRMISH  ";
+                        gameTypeMenu[2, 1] = "  BATTLE   ";
+                        gameTypeMenu[3, 1] = " INVASION  ";
+                        gameTypeMenu[4, 1] = "    WAR    ";
+                        gameTypeMenu[5, 1] = "  CUSTOM   ";
+                        gameTypeMenu[6, 1] = " MAIN MENU ";
+
+                        while (gameTypeMenuing)
+                        {
+                            Console.Clear();
+                            Console.WriteLine("      YOU ARE PLAYING BATTLESHIP      \n");
+                            Console.WriteLine("          SELECT GAME TYPE             \n");
                             Console.WriteLine();
-                        }
 
-                        switch (cursorRow)
-                        {
-                            case 0:
-                                gameTypeDescription = "       FIND THE SPY \n    A SINGLE SHIP IN A SMALL AREA";
-                                break;
-                            case 1:
-                                gameTypeDescription = "    A SMALL ENGAGEMENT\n     FEW SHIPS IN A SMALL AREA";
-                                break;
-                            case 2:
-                                gameTypeDescription = "    A STANDARD BATTLE\n   SHIPS IN A STANDARD-SIZE AREA";
-                                break;
-                            case 3:
-                                gameTypeDescription = "   A LARGE ENGAGEMENT\n    MANY SHIPS IN A LARGE AREA";
-                                break;
-                            case 4:
-                                gameTypeDescription = "   A MASSIVE ENGAGEMENT\n    LOTS OF SHIPS IN A HUGE AREA";
-                                break;
-                            case 5:
-                                gameTypeDescription = "   SET CUSTOM SETTINGS\n   GO TO 'SETTINGS' IN MAIN MENU";
-                                break;
-                            case 6:
-                                gameTypeDescription = "             -         ";
-                                break;
-                            default:
-                                break;
-                        }
-                        Console.WriteLine($"\n     {gameTypeDescription}");
 
-                        keyPressed = Console.ReadKey();
+                            for (int row = 0; row < gameTypeMenuMax; row++)
+                            {
+                                for (int col = 0; col < 3; col++)
+                                {
+                                    if (cursorRow == row && cursorCol == col)
+                                        Console.Write($"[ {gameTypeMenu[row, col]} ]");
+                                    else
+                                        Console.Write($"  {gameTypeMenu[row, col]}  ");
+                                }
+                                Console.WriteLine();
+                            }
 
-                        if ((keyPressed.Key == ConsoleKey.W || keyPressed.Key == ConsoleKey.UpArrow))
-                        {
-                            if (cursorRow > 0)
-                                cursorRow -= 1;
-                            else if (cursorRow == 0)
-                                cursorRow = gameTypeMenuMax - 1;
-                        }
-                        else if ((keyPressed.Key == ConsoleKey.S || keyPressed.Key == ConsoleKey.DownArrow))
-                        {
-                            if (cursorRow < gameTypeMenuMax - 1)
-                                cursorRow += 1;
-                            else if (cursorRow == gameTypeMenuMax - 1)
+                            switch (cursorRow)
+                            {
+                                case 0:
+                                    gameTypeDescription = "       FIND THE SPY \n    A SINGLE SHIP IN A SMALL AREA";
+                                    break;
+                                case 1:
+                                    gameTypeDescription = "    A SMALL ENGAGEMENT\n     FEW SHIPS IN A SMALL AREA";
+                                    break;
+                                case 2:
+                                    gameTypeDescription = "    A STANDARD BATTLE\n   SHIPS IN A STANDARD-SIZE AREA";
+                                    break;
+                                case 3:
+                                    gameTypeDescription = "   A LARGE ENGAGEMENT\n    MANY SHIPS IN A LARGE AREA";
+                                    break;
+                                case 4:
+                                    gameTypeDescription = "   A MASSIVE ENGAGEMENT\n    LOTS OF SHIPS IN A HUGE AREA";
+                                    break;
+                                case 5:
+                                    gameTypeDescription = "   SET CUSTOM SETTINGS\n   GO TO 'SETTINGS' IN MAIN MENU";
+                                    break;
+                                case 6:
+                                    gameTypeDescription = "             -         ";
+                                    break;
+                                default:
+                                    break;
+                            }
+                            Console.WriteLine($"\n     {gameTypeDescription}");
+
+                            keyPressed = Console.ReadKey();
+
+                            if ((keyPressed.Key == ConsoleKey.W || keyPressed.Key == ConsoleKey.UpArrow))
+                            {
+                                if (cursorRow > 0)
+                                    cursorRow -= 1;
+                                else if (cursorRow == 0)
+                                    cursorRow = gameTypeMenuMax - 1;
+                            }
+                            else if ((keyPressed.Key == ConsoleKey.S || keyPressed.Key == ConsoleKey.DownArrow))
+                            {
+                                if (cursorRow < gameTypeMenuMax - 1)
+                                    cursorRow += 1;
+                                else if (cursorRow == gameTypeMenuMax - 1)
+                                    cursorRow = 0;
+                            }
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 0)
+                            {
+                                gameType = "SPY HUNT";
+                                gridRows = 5;
+                                gridCols = 5;
+                                numberOfShips = 1;
+                                mainMenuing = true;
+                                gameTypeMenuing = false;
                                 cursorRow = 0;
-                        }
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 0)
-                        {
-                            gameType = "SPY HUNT";
-                            gridRows = 5;
-                            gridCols = 5;
-                            numberOfShips = 1;
-                            mainMenuing = true;
-                            gameTypeMenuing = false;
-                            cursorRow = 0;
-                        }
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 1)
-                        {
-                            gameType = "SKIRMISH";
-                            gridRows = 6;
-                            gridCols = 6;
-                            numberOfShips = 4;
-                            mainMenuing = true;
-                            gameTypeMenuing = false;
-                            cursorRow = 0;
-                        }
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 2)
-                        {
-                            gameType = "BATTLE";
-                            gridRows = 8;
-                            gridCols = 8;
-                            numberOfShips = 8;
-                            mainMenuing = true;
-                            gameTypeMenuing = false;
-                            cursorRow = 0;
-                        }
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 3)
-                        {
-                            gameType = "INVASION";
-                            gridRows = 10;
-                            gridCols = 10;
-                            numberOfShips = 12;
-                            mainMenuing = true;
-                            gameTypeMenuing = false;
-                            cursorRow = 0;
-                        }
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 4)
-                        {
-                            gameType = "WAR";
-                            gridRows = 15;
-                            gridCols = 15;
-                            numberOfShips = 28;
-                            mainMenuing = true;
-                            gameTypeMenuing = false;
-                            cursorRow = 0;
-                        }
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 5)
-                        {
-                            mainMenuing = true;
-                            gameTypeMenuing = false;
-                            cursorRow = 2;
-                        }
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == gameTypeMenuMax - 1)
-                        {                           
-                            mainMenuing = true;
-                            gameTypeMenuing = false;
-                            cursorRow = 0;
+                                cheats = false;
+                            }
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 1)
+                            {
+                                gameType = "SKIRMISH";
+                                gridRows = 6;
+                                gridCols = 6;
+                                numberOfShips = 4;
+                                mainMenuing = true;
+                                gameTypeMenuing = false;
+                                cursorRow = 0;
+                                cheats = false;
+                            }
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 2)
+                            {
+                                gameType = "BATTLE";
+                                gridRows = 8;
+                                gridCols = 8;
+                                numberOfShips = 8;
+                                mainMenuing = true;
+                                gameTypeMenuing = false;
+                                cursorRow = 0;
+                                cheats = false;
+                            }
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 3)
+                            {
+                                gameType = "INVASION";
+                                gridRows = 10;
+                                gridCols = 10;
+                                numberOfShips = 12;
+                                mainMenuing = true;
+                                gameTypeMenuing = false;
+                                cursorRow = 0;
+                                cheats = false;
+                            }
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 4)
+                            {
+                                gameType = "WAR";
+                                gridRows = 15;
+                                gridCols = 15;
+                                numberOfShips = 28;
+                                mainMenuing = true;
+                                gameTypeMenuing = false;
+                                cursorRow = 0;
+                                cheats = false;
+                            }
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 5)
+                            {
+                                mainMenuing = true;
+                                gameTypeMenuing = false;
+                                cursorRow = 2;
+                            }
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == gameTypeMenuMax - 1)
+                            {
+                                mainMenuing = true;
+                                gameTypeMenuing = false;
+                                cursorRow = 0;
+                            }
                         }
                     }
-                }
-                //SETTINGS
-                else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 2)
-                {
-                    mainMenuing = false;
-                    cursorRow = 0;
-                    cursorCol = 0;
-                    settingsMenuing = true;
-                    Console.Clear();
-
-                    //Generate Settings Menu
-                    string[,] settingsMenu = new string[settingsMenuMax, 3];
-
-                    for (int row = 0; row < settingsMenuMax; row++)
+                    //SETTINGS
+                    else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 2)
                     {
-                        for (int col = 0; col < 3; col++)
-                        {
-                            settingsMenu[row, col] = "       ";
-                        }
-                    }
-
-                    while (settingsMenuing)
-                    {
-                        settingsMenu[0, 0] = "     ENEMY    ";
-                        settingsMenu[1, 0] = "  DIFFICULTY  ";
-                        settingsMenu[2, 0] = "  HP DISPLAY  ";
-                        settingsMenu[3, 0] = " # OF COLUMNS ";
-                        settingsMenu[4, 0] = "  # OF ROWS   ";
-                        settingsMenu[5, 0] = "  # OF SHIPS  ";
-                        settingsMenu[6, 0] = "    CHEATS    ";
-                        settingsMenu[7, 0] = "    LESS UI   ";
-                        settingsMenu[8, 0] = "   MAIN MENU  ";
-
-                        settingsMenu[0, 2] = enemySelection.PadLeft(enemySelection.Length + 3);
-                        settingsMenu[1, 2] = difficultyDisplay;
-                        settingsMenu[2, 2] = hpDisplay;
-                        settingsMenu[3, 2] = $"      {gridCols}     ";
-                        settingsMenu[4, 2] = $"      {gridRows}     ";
-                        settingsMenu[5, 2] = $"      {numberOfShips}     ";
-                        settingsMenu[6, 2] = cheatsDisplay;
-                        settingsMenu[7, 2] = lessUIDisplay;
-                        settingsMenu[8, 2] = "     -      ";
-
-
+                        mainMenuing = false;
+                        cursorRow = 0;
+                        cursorCol = 0;
+                        settingsMenuing = true;
                         Console.Clear();
-                        Console.WriteLine("      YOU ARE PLAYING BATTLESHIP      \n");
-                        Console.WriteLine("            SETTINGS MENU             \n");
-                        Console.WriteLine();
+
+                        //Generate Settings Menu
+                        string[,] settingsMenu = new string[settingsMenuMax, 3];
 
                         for (int row = 0; row < settingsMenuMax; row++)
                         {
                             for (int col = 0; col < 3; col++)
                             {
-                                if (cursorRow == row && cursorCol == col)
-                                    Console.Write($" [{settingsMenu[row, col]}] ");
-                                else
-                                    Console.Write($"  {settingsMenu[row, col]}  ");
-                            }
-                            Console.WriteLine();
-                        }
-
-                        keyPressed = Console.ReadKey();
-
-                        if ((keyPressed.Key == ConsoleKey.W || keyPressed.Key == ConsoleKey.UpArrow))
-                        {
-                            if (cursorRow > 0)
-                                cursorRow -= 1;
-                            else if (cursorRow == 0)
-                                cursorRow = settingsMenuMax - 1;
-                        }
-                        else if ((keyPressed.Key == ConsoleKey.S || keyPressed.Key == ConsoleKey.DownArrow))
-                        {
-                            if (cursorRow < settingsMenuMax - 1)
-                                cursorRow += 1;
-                            else if (cursorRow == settingsMenuMax - 1)
-                                cursorRow = 0;
-                        }
-
-
-                        //SETTINGS BUTTONS
-                        //Enemy Display
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 0)
-                        {
-                            switch (enemySelection)
-                            {
-                                case "NARRATOR":
-                                    enemySelection = "PIRATE";
-                                    break;
-                                case "PIRATE":
-                                    enemySelection = "NARRATOR";
-                                    break;
-                                default:
-                                    break;
+                                settingsMenu[row, col] = "       ";
                             }
                         }
-                        //Difficulty Display
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 1)
+
+                        while (settingsMenuing)
                         {
-                            if (difficultyMultiplier == 1)
-                            {
-                                difficultyMultiplier = 2;
-                                difficultyDisplay = "    HARD    ";
-                            }
+                            settingsMenu[0, 0] = "     ENEMY    ";
+                            settingsMenu[1, 0] = "  DIFFICULTY  ";
+                            settingsMenu[2, 0] = "  HP DISPLAY  ";
+                            settingsMenu[3, 0] = " # OF COLUMNS ";
+                            settingsMenu[4, 0] = "  # OF ROWS   ";
+                            settingsMenu[5, 0] = "  # OF SHIPS  ";
+                            settingsMenu[6, 0] = "    CHEATS    ";
+                            settingsMenu[7, 0] = "    LESS UI   ";
+                            settingsMenu[8, 0] = "   MAIN MENU  ";
+
+                            if (cheats)
+                                cheatsDisplay = "     ON     ";
                             else
+                                cheatsDisplay = "     OFF    ";
+
+                            settingsMenu[0, 2] = enemySelection.PadLeft(enemySelection.Length + 3);
+                            settingsMenu[1, 2] = difficultyDisplay;
+                            settingsMenu[2, 2] = hpDisplay;
+                            settingsMenu[3, 2] = $"      {gridCols}     ";
+                            settingsMenu[4, 2] = $"      {gridRows}     ";
+                            settingsMenu[5, 2] = $"      {numberOfShips}     ";
+                            settingsMenu[6, 2] = cheatsDisplay;
+                            settingsMenu[7, 2] = lessUIDisplay;
+                            settingsMenu[8, 2] = "     -      ";
+
+
+                            Console.Clear();
+                            Console.WriteLine("      YOU ARE PLAYING BATTLESHIP      \n");
+                            Console.WriteLine("            SETTINGS MENU             \n");
+                            Console.WriteLine();
+
+                            for (int row = 0; row < settingsMenuMax; row++)
                             {
-                                difficultyMultiplier = 1;
-                                difficultyDisplay = "   NORMAL   ";
+                                for (int col = 0; col < 3; col++)
+                                {
+                                    if (cursorRow == row && cursorCol == col)
+                                        Console.Write($" [{settingsMenu[row, col]}] ");
+                                    else
+                                        Console.Write($"  {settingsMenu[row, col]}  ");
+                                }
+                                Console.WriteLine();
                             }
-                        }
-                        //HP Display type
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 2)
-                        {
-                            if (lessUI)
+
+                            keyPressed = Console.ReadKey();
+
+                            if ((keyPressed.Key == ConsoleKey.W || keyPressed.Key == ConsoleKey.UpArrow))
+                            {
+                                if (cursorRow > 0)
+                                    cursorRow -= 1;
+                                else if (cursorRow == 0)
+                                    cursorRow = settingsMenuMax - 1;
+                            }
+                            else if ((keyPressed.Key == ConsoleKey.S || keyPressed.Key == ConsoleKey.DownArrow))
+                            {
+                                if (cursorRow < settingsMenuMax - 1)
+                                    cursorRow += 1;
+                                else if (cursorRow == settingsMenuMax - 1)
+                                    cursorRow = 0;
+                            }
+
+                            //SETTINGS BUTTONS
+                            //Enemy Display
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 0)
+                            {
+                                switch (enemySelection)
+                                {
+                                    case "NARRATOR":
+                                        enemySelection = "PIRATE";
+                                        break;
+                                    case "PIRATE":
+                                        enemySelection = "NARRATOR";
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            //Difficulty Display
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 1)
+                            {
+                                if (difficultyMultiplier == 1)
+                                {
+                                    difficultyMultiplier = 2;
+                                    difficultyDisplay = "    HARD    ";
+                                }
+                                else
+                                {
+                                    difficultyMultiplier = 1;
+                                    difficultyDisplay = "   NORMAL   ";
+                                }
+                            }
+                            //HP Display type
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 2)
+                            {
+                                if (lessUI)
+                                {
+                                    Console.Clear();
+                                    Console.WriteLine("\n\n\n           TURN OFF 'LESS UI'");
+                                    Console.WriteLine("       BEFORE SWITCHING TO 'VISUAL'");
+                                    Console.WriteLine("\n              [ OKAY ]");
+                                    Console.ReadLine();
+                                }
+                                else
+                                {
+                                    if (hpDisiplayNumber)
+                                    {
+                                        hpDisiplayNumber = false;
+                                        hpDisplay = "   VISUAL   ";
+                                    }
+                                    else
+                                    {
+                                        hpDisiplayNumber = true;
+                                        hpDisplay = "  NUMERICAL ";
+                                    }
+                                }
+                            }
+                            //number of gird columns
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 3)
                             {
                                 Console.Clear();
-                                Console.WriteLine("\n\n\n           TURN OFF 'LESS UI'");
-                                Console.WriteLine("       BEFORE SWITCHING TO 'VISUAL'");
-                                Console.WriteLine("\n              [ OKAY ]");
-                                Console.ReadLine();
+                                Console.WriteLine("\n\n        How columns will the field span?");
+                                gridCols = Convert.ToInt32(Console.ReadLine());
                             }
-                            else
+                            //number of gird rows
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 4)
                             {
-                                if (hpDisiplayNumber)
+                                Console.Clear();
+                                Console.WriteLine("\n\n        How many rows will the field span?");
+                                gridRows = Convert.ToInt32(Console.ReadLine());
+                            }
+                            //number of ships deployed
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 5)
+                            {
+                                Console.Clear();
+                                Console.WriteLine("\n\n        How many ships will each side deploy?");
+                                numberOfShips = Convert.ToInt32(Console.ReadLine());
+                            }
+                            //Cheats on/off
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 6)
+                            {
+                                if (cheats)
+                                    cheats = false;
+                                else
+                                    cheats = true;                               
+                            }
+                            //Less UI On/Off
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 7)
+                            {
+                                if (lessUI)
                                 {
+                                    lessUI = false;
+                                    lessUIDisplay = "     OFF    ";
                                     hpDisiplayNumber = false;
                                     hpDisplay = "   VISUAL   ";
                                 }
                                 else
                                 {
+                                    lessUI = true;
+                                    lessUIDisplay = "     ON     ";
                                     hpDisiplayNumber = true;
                                     hpDisplay = "  NUMERICAL ";
                                 }
                             }
-                        }
-                        //number of gird columns
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 3)
-                        {
-                            Console.Clear();
-                            Console.WriteLine("\n\n        How columns will the field span?");
-                            gridCols = Convert.ToInt32(Console.ReadLine());
-                        }
-                        //number of gird rows
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 4)
-                        {
-                            Console.Clear();
-                            Console.WriteLine("\n\n        How many rows will the field span?");
-                            gridRows = Convert.ToInt32(Console.ReadLine());
-                        }
-                        //number of ships deployed
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 5)
-                        {
-                            Console.Clear();
-                            Console.WriteLine("\n\n        How many ships will each side deploy?");
-                            numberOfShips = Convert.ToInt32(Console.ReadLine());
-                        }
-                        //Cheats on/off
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 6)
-                        {
-                            if (cheats)
+                            //Main Menu
+                            else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == settingsMenuMax - 1)
                             {
-                                cheats = false;
-                                cheatsDisplay = "     OFF    ";
-                            }
-                            else
-                            {
-                                cheats = true;
-                                cheatsDisplay = "     ON     ";
-                            }
-                        }
-                        //Less UI On/Off
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 7)
-                        {
-                            if (lessUI)
-                            {
-                                lessUI = false;
-                                lessUIDisplay = "     OFF    ";
-                                hpDisiplayNumber = false;
-                                hpDisplay = "   VISUAL   ";
-                            }
-                            else
-                            {
-                                lessUI = true;
-                                lessUIDisplay = "     ON     ";
-                                hpDisiplayNumber = true;
-                                hpDisplay = "  NUMERICAL ";
-                            }
-                        }
-                        //Main Menu
-                        else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == settingsMenuMax - 1)
-                        {
-                            mainMenuing = true;
-                            settingsMenuing = false;
-                            cursorRow = 0;
-                            cursorCol = 1;
+                                mainMenuing = true;
+                                settingsMenuing = false;
+                                cursorRow = 0;
+                                cursorCol = 1;
+                                lastShotHit = false;
 
-                            if (cheats)
-                                gameType = "CHEATER";
-                            else if (gridRows == 5 && gridCols == 5 && numberOfShips == 1)
-                                gameType = "SPY HUNT";
-                            else if (gridRows == 6 && gridCols == 6 && numberOfShips == 4)
-                                gameType = "SKIRMISH";
-                            else if (gridRows == 8 && gridCols == 8 && numberOfShips == 8)
-                                gameType = "BATTLE";
-                            else if (gridRows == 10 && gridCols == 10 && numberOfShips == 12)
-                                gameType = "INVASION";
-                            else if (gridRows == 15 && gridCols == 15 && numberOfShips == 28)
-                                gameType = "WAR";
-                            else
-                                gameType = "CUSTOM";
+                                if (cheats)
+                                    gameType = "CHEATER";
+                                else if (gridRows == 5 && gridCols == 5 && numberOfShips == 1)
+                                    gameType = "SPY HUNT";
+                                else if (gridRows == 6 && gridCols == 6 && numberOfShips == 4)
+                                    gameType = "SKIRMISH";
+                                else if (gridRows == 8 && gridCols == 8 && numberOfShips == 8)
+                                    gameType = "BATTLE";
+                                else if (gridRows == 10 && gridCols == 10 && numberOfShips == 12)
+                                    gameType = "INVASION";
+                                else if (gridRows == 15 && gridCols == 15 && numberOfShips == 28)
+                                    gameType = "WAR";
+                                else
+                                    gameType = "CUSTOM";
+                            }
                         }
                     }
-                }
-                //HIGH SCORES
-                else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == mainMenuMax - 1)
-                {
-                    Console.Clear();
-                    Console.WriteLine();
-                    Console.WriteLine("             HIGH SCORES          \n");
-
-                    //SqlConnection connection = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=""C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\Database1.mdf"";Integrated Security=True");
-
-                    SqlCommand command = new SqlCommand("SELECT top 10 * FROM Scores ORDER BY score DESC;", connection);
-                    connection.Open();
-
-                    SqlDataReader reader = command.ExecuteReader();
-
-                    int[,] highScores = new int[10, 3];
-                    int rank = 1;
-
-                    Console.Write("     Rank       NAME        SCORE\n");
-
-                    while (reader.Read())
+                    //HIGH SCORES
+                    else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == 3)
                     {
-                        Console.Write($"      {rank.ToString().PadRight(9)}");
-                        Console.Write($"{reader["name"].ToString().PadRight(14)}");
-                        Console.WriteLine(reader["score"]);
-                        rank++;
+                        Console.Clear();
+                        Console.WriteLine();
+                        Console.WriteLine("             HIGH SCORES          \n");
 
-                        //for (int row = 0; row < 10; row++)
-                        //    {
-                        //        for (int col = 0; col < 3; col++)
-                        //        {
-                        //            if (col == 0)
-                        //                Console.Write(row + 1 + "    ");
-                        //            else if (col == 1)
-                        //                Console.Write($"{reader["name"]}    ");
-                        //            else if (col == 2)
-                        //                Console.Write(reader["score"]);
-                        //        }
-                        //    }
+                        //SqlConnection connection = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=""C:\Users\shino\source\repos\Session 16\GridTesting\GridTesting\Database1.mdf"";Integrated Security=True");
+
+                        SqlCommand command = new SqlCommand("SELECT top 10 * FROM Scores ORDER BY score DESC;", connection);
+                        connection.Open();
+
+                        SqlDataReader reader = command.ExecuteReader();
+
+                        int[,] highScores = new int[10, 3];
+                        int rank = 1;
+
+                        Console.Write("     Rank       NAME        SCORE\n");
+
+                        while (reader.Read())
+                        {
+                            Console.Write($"      {rank.ToString().PadRight(9)}");
+                            Console.Write($"{reader["name"].ToString().PadRight(14)}");
+                            Console.WriteLine(reader["score"]);
+                            rank++;
+
+                            //for (int row = 0; row < 10; row++)
+                            //    {
+                            //        for (int col = 0; col < 3; col++)
+                            //        {
+                            //            if (col == 0)
+                            //                Console.Write(row + 1 + "    ");
+                            //            else if (col == 1)
+                            //                Console.Write($"{reader["name"]}    ");
+                            //            else if (col == 2)
+                            //                Console.Write(reader["score"]);
+                            //        }
+                            //    }
 
 
-                        // Console.WriteLine();
+                            // Console.WriteLine();
+                        }
+
+                        Console.WriteLine("\n            [ MAIN MENU ]       ");
+                        Console.ReadLine();
+                        connection.Close();
+                        //button to go back
                     }
-
-                    Console.WriteLine("\n            [ MAIN MENU ]       ");
-                    Console.ReadLine();
-                    connection.Close();
-                    //button to go back
+                    else if (keyPressed.Key == ConsoleKey.Enter && cursorRow == mainMenuMax - 1)
+                    {
+                        mainMenuing = false;
+                        programRunning = false;
+                        Console.Clear();
+                        Console.WriteLine("\n\n\n    THANK YOU FOR PLAYING!\n\n");
+                    }
                 }
             }
 
@@ -946,11 +922,65 @@ namespace GridTesting
 
 
 
+            
+            
+            
+            
+        }
 
-            
-            
-            
-            
+        private static void EnemyAttacks(int gridRows, int gridCols, ref bool gameOver, int turnCounter, ref bool lastShotHit, int difficultyMultiplier, bool lessUI, Enemy enemy, ref int chanceToBeHit, ref int yourShipsRemaining, ref int yourShipLife)
+        {
+            int takeDamage;
+            Random rando = new Random();
+            if (lastShotHit)
+            {
+                if (!lessUI)
+                    Console.WriteLine(enemy.enemyHunting);
+
+                takeDamage = rando.Next((gridRows * gridCols) / (2 * difficultyMultiplier));
+            }
+            else
+            {
+                if (!lessUI)
+                    Console.WriteLine(enemy.enemySearching);
+
+                takeDamage = rando.Next(gridRows * gridCols);
+            }
+
+            if (turnCounter == 0)
+            {
+                Console.WriteLine(enemy.enemyTurn0Action);
+            }
+            else
+            {
+                if (takeDamage < chanceToBeHit)
+                {
+                    Console.WriteLine(enemy.shipHitByEnemy);
+                    lastShotHit = true;
+                    yourShipLife--;
+                    if (yourShipLife % 3 == 0)
+                    {
+                        yourShipsRemaining--;
+                        Console.WriteLine(enemy.shipSunkByEnemy);
+                        lastShotHit = false;
+                        if (yourShipsRemaining == 0)
+                        {
+                            gameOver = true;
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(enemy.enemyShotMissed);
+                }
+                if (turnCounter % Math.Floor((gridRows * gridCols) / (10.0 * difficultyMultiplier)) == 0)
+                {
+                    chanceToBeHit++;
+                }
+            }
+
+            //Console.WriteLine($" turnCounter = {turnCounter}");
+            //Console.WriteLine($"ChanceToBeHit = {chanceToBeHit}");
         }
 
         private static void CheckRight(StringBuilder directionBuilder, int[,] grid, int shipRow, int shipCol)
