@@ -2,6 +2,8 @@
 using System.Data.SqlClient;
 
 //TODO
+//Restrict numberofshipsdeployed above ratio of board size
+//Format win/loss screens
 //More enemies
 //Center enemy name in settings menu
 //Refactor Code for readability
@@ -177,7 +179,22 @@ namespace GridTesting
                                 enemy.enemyWins = "Yer ships are fish food - time to walk the plank!";
                                 enemy.enemyLoses = "Ahhhh, ye got me - off I go to Davey Jones!";
                                 break;
-                            case "robot":
+                            case "ROBOT":
+                                enemy.enemyName = "    ROBOT   ";
+                                enemy.enemyTurn0Action = "I WILL EXTERMINATE ALL LIFE FORMS!";
+                                enemy.enemySearching = "SCANNING FOR PLAYER'S SHIPS...";
+                                enemy.enemyHunting = "SHIP DETECTED! EXTERMINATE! EXTERMINATE!";
+                                enemy.shipHitByEnemy = "TAKE THAT, YOU PITIFUL ORGANIC!";
+                                enemy.shipSunkByEnemy = "AS YOUR SHIPS DIE, SO TOO WILL YOUR HOPE";
+                                enemy.enemyShotMissed = "I WILL REFACTOR MY STRATEGY TO FIND YOU";
+                                enemy.shotOffBoard = "AN OUT OF BOUNDS ERROR. HA. HA. HA.\nRERUN SHOOTING!";
+                                enemy.hitEnemyShip = "MY SHIP HAS SUFFERED EXTERNAL DAMAGE";
+                                enemy.sunkEnemyShip = "ROBOT.SHIPDOWN INITIATED. HOW COULD YOU?";
+                                enemy.spaceAlreadyHit = "IMAGINE NOT LEARNING FROM ONE'S MISTAKES";
+                                enemy.missedShot = "WHAT ARE YOU EVEN AIMING AT?";
+                                enemy.closeShot = "YOU ARE CLOSE, BUT NOT CLOSE ENOUGH";
+                                enemy.enemyWins = "GOOD RIDDANCE, YOU WERE ONLY LEGACY CODE";
+                                enemy.enemyLoses = "NOOO. I WAS ONES AND ZEROS. NOW ONLY ZERO.";
                                 break;
                         }
 
@@ -735,6 +752,9 @@ namespace GridTesting
                                         enemySelection = "PIRATE";
                                         break;
                                     case "PIRATE":
+                                        enemySelection = "ROBOT";
+                                        break;
+                                    case "ROBOT":
                                         enemySelection = "NARRATOR";
                                         break;
                                     default:
